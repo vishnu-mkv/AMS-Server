@@ -6,5 +6,7 @@ namespace AMS.Responses
     {
         //roles
         new public RoleResponse[] Roles { get; set; } = Array.Empty<RoleResponse>();
+
+        new public GroupSummaryResponse[] Groups { get; set; } = Array.Empty<GroupSummaryResponse>();
     }
 }

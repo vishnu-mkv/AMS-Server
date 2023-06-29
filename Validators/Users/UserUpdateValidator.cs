@@ -30,7 +30,7 @@ public class UpdateUserValidator : AbstractValidator<UpdateUserRequest>
             .SetValidator(new RolesValidator<UpdateUserRequest>(rolePermissionProvider, authManager));
 
         RuleFor(x => x.ScheduleId)
-            .SetValidator(new ScheduleIdValidator<UpdateUserRequest>(scheduleManager));
+            .SetValidator(new ScheduleIdValidator<UpdateUserRequest>(scheduleManager, authManager));
     }
 
     private static bool CheckIfSignInAllowed(IUserManager userManager, IServiceScopeFactory scopeFactory, UpdateUserRequest x)

@@ -40,6 +40,8 @@ builder.Services.AddValidatorsFromAssemblyContaining<UpdateUserValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<AddRoleValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<UpdateRoleValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<AddScheduleValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<AddGroupValidaor>();
+builder.Services.AddValidatorsFromAssemblyContaining<UpdateGroupValidaor>();
 // ------------
 
 
@@ -53,7 +55,8 @@ builder.Services.AddScoped<IUserManager, UserManager>();
 builder.Services.AddScoped<IScheduleManager, ScheduleManager>();
 builder.Services.AddSingleton<IOrganizationProvider, OrganizationProvider>();
 builder.Services.AddScoped<IAuthManager, AuthManager>();
-
+builder.Services.AddScoped<IGroupManager, GroupManager>();
+builder.Services.AddScoped<ITopicManager, TopicManager>();
 
 builder.Services.AddAuthorization();
 builder.Services.AddSingleton<IAuthorizationHandler, PermissionAuthorizationHandler>();
@@ -109,6 +112,8 @@ builder.Services.AddSwaggerGen(setup =>
     {
         { jwtSecurityScheme, Array.Empty<string>() }
     });
+
+    setup.CustomSchemaIds(type => SwashbuckleSchemaHelper.GetSchemaId(type));
 });
 
 const string MyAllowSpecificOrigins = "Allowed Origins";

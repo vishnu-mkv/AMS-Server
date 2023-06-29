@@ -23,9 +23,13 @@ namespace AMS.Utils
             CreateMap<Role, RoleDetailResponse>();
             CreateMap<Permission, PermissionResponse>();
             CreateMap<Schedule, ScheduleResponse>();
+            CreateMap<Group, GroupResponse>();
+            CreateMap<Group, GroupSummaryResponse>();
 
             // create map for paginationDTO
             CreateMap<PaginationDTO<ApplicationUser>, PaginationDTO<UserSummaryResponse>>();
+            CreateMap<PaginationDTO<Group>, PaginationDTO<GroupSummaryResponse>>();
+
         }
     }
 }

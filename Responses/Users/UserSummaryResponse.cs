@@ -17,6 +17,8 @@ public class UserBaseSummaryResponse
     public string? Picture { get; set; }
 
     public bool disabled { get; set; }
+
+    public string? ScheduleId { get; set; }
 }
 
 public class UserSummaryResponse : UserBaseSummaryResponse

@@ -1,8 +1,6 @@
 // simple controller to return the home page
 // return hello world
 
-using AMS.Authorization;
-using AMS.Providers;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AMS.Controllers;

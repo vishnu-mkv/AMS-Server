@@ -59,6 +59,9 @@ namespace AMS.Models
 
         public string? ScheduleId { get; set; } = null;
 
+        // a user can be in many groups
+        public virtual ICollection<Group> Groups { get; set; } = new List<Group>();
+
         public ApplicationUser()
         {
             Id = Guid.NewGuid().ToString();

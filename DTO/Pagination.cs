@@ -1,3 +1,5 @@
+using AMS.Models;
+
 namespace AMS.DTO;
 
 public class PaginationDTO<T>
@@ -43,4 +45,13 @@ public class PaginationQuery
 public class UserPaginationQuery : PaginationQuery
 {
     public string[] Roles { get; set; } = Array.Empty<string>();
+}
+
+public class GroupPaginationQuery : PaginationQuery
+{
+    // scheduleId
+
+    public string? ScheduleId { get; set; } = null;
+    // group type
+    public GroupType GroupType { get; set; } = GroupType.GroupOfUsers;
 }

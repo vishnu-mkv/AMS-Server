@@ -15,17 +15,15 @@ namespace AMS.Controllers
     {
 
         private readonly IRoleProvider _roleProvider;
-        private readonly IUserManager _userManager;
         private readonly IMapper mapper;
         private readonly IRoleManager roleManager;
         private readonly AddRoleValidator addRoleValidator;
         private readonly UpdateRoleValidator updateRoleValidator;
 
-        public AuthController(IRoleProvider roleProvider, IUserManager userManager, IMapper mapper,
+        public AuthController(IRoleProvider roleProvider, IMapper mapper,
                                 IRoleManager roleManager, AddRoleValidator addRoleValidator, UpdateRoleValidator updateRoleValidator)
         {
             _roleProvider = roleProvider;
-            _userManager = userManager;
             this.mapper = mapper;
             this.roleManager = roleManager;
             this.addRoleValidator = addRoleValidator;

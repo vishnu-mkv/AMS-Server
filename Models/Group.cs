@@ -25,6 +25,11 @@ public class Group
     public ICollection<ApplicationUser> Users { get; set; } = new List<ApplicationUser>();
     public GroupType GroupType { get; set; }
 
+    public Schedule? Schedule { get; set; }
+    public string? ScheduleId { get; set; }
+
+    public bool Disabled { get; set; } = false;
+
     public Group()
     {
         Id = Guid.NewGuid().ToString();

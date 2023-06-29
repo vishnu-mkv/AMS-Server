@@ -1,6 +1,5 @@
 using AMS.Data;
 using AMS.Interfaces;
-using AMS.Managers.Auth;
 using AMS.Models;
 using AMS.Requests;
 
@@ -31,9 +30,9 @@ public class ScheduleManager : IScheduleManager
         return schedule;
     }
 
-    public bool CheckIfScheduleExists(string id)
+    public bool CheckIfScheduleExists(string id, string organizationId)
     {
-        return _context.Schedules.Any(x => x.Id == id);
+        return _context.Schedules.Any(x => x.Id == id && x.OrganizationId == organizationId);
     }
 
     public Schedule? GetSchedule(string id)

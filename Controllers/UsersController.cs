@@ -109,7 +109,7 @@ namespace AMS.Controllers
         [Route("{id}")]
         public ActionResult<ApplicationUser> GetUser([FromRoute] string id)
         {
-            var user = _userManager.GetUserById(id, includeRoles: true);
+            var user = _userManager.GetUserById(id, includeRoles: true, includeGroups: true);
 
             return Ok(_mapper.Map<UserResponse>(user));
         }

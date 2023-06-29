@@ -1,5 +1,5 @@
 .vscode/
 bin/
 obj/
-Properties/
+./Properties/
 wwwroot/media/profile/

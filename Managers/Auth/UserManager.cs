@@ -6,7 +6,6 @@ using AMS.Requests;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using System.Globalization;
-using System.Security.Claims;
 
 namespace AMS.Managers.Auth
 {
@@ -35,13 +34,15 @@ namespace AMS.Managers.Auth
             this.authManager = authManager;
         }
 
-        public ApplicationUser? GetUserById(string id, bool includeRoles = false, bool includeSchedule = false)
+        public ApplicationUser? GetUserById(string id, bool includeRoles = false, bool includeSchedule = false, bool includeGroups = false)
         {
             var query = dbContext.Users.AsQueryable();
 
             if (includeRoles) query = query.Include(u => u.Roles);
 
             if (includeSchedule) query = query.Include(u => u.Schedule);
+
+            if (includeGroups) query = query.Include(u => u.Groups);
 
             return query.FirstOrDefault(u => u.Id == id);
         }
@@ -230,6 +231,11 @@ namespace AMS.Managers.Auth
         public bool UserExists(string organizationId, string id)
         {
             return dbContext.Users.Any(u => u.Id == id && u.OrganizationId == organizationId);
+        }
+
+        public bool CheckUsersHaveSchedule(string? scheduleId, string[] users)
+        {
+            return dbContext.Users.Where(u => users.Contains(u.Id)).All(u => u.ScheduleId == scheduleId);
         }
     }
 }

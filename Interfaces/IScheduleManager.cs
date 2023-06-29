@@ -6,7 +6,7 @@ namespace AMS.Interfaces;
 public interface IScheduleManager
 {
 
-    bool CheckIfScheduleExists(string id);
+    bool CheckIfScheduleExists(string id, string organizationId);
     Schedule AddSchedule(AddScheduleRequest addScheduleRequest);
     Schedule? GetSchedule(string id);
     List<Schedule> GetSchedules();

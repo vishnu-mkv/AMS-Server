@@ -29,7 +29,7 @@ namespace AMS.Validators
                 .SetValidator(new RolesValidator<AddUserRequest>(rolePermissionProvider, authManager));
 
             RuleFor(x => x.ScheduleId)
-                .SetValidator(new ScheduleIdValidator<AddUserRequest>(scheduleManager));
+                .SetValidator(new ScheduleIdValidator<AddUserRequest>(scheduleManager, authManager));
         }
     }
 }

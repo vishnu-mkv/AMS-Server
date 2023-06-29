@@ -4,6 +4,7 @@ using AMS.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AMS.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230629062501_group")]
+    partial class group
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -43,6 +46,9 @@ namespace AMS.Migrations
                     b.Property<int>("Gender")
                         .HasColumnType("int");
 
+                    b.Property<string>("GroupId")
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<string>("LastName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -67,6 +73,8 @@ namespace AMS.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("GroupId");
 
                     b.HasIndex("OrganizationId");
 
@@ -201,29 +209,6 @@ namespace AMS.Migrations
                     b.ToTable("Schedules");
                 });
 
-            modelBuilder.Entity("AMS.Models.Topic", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("Color")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("OrganizationId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("OrganizationId");
-
-                    b.ToTable("Topics");
-                });
-
             modelBuilder.Entity("ApplicationUserRole", b =>
                 {
                     b.Property<string>("RolesId")
@@ -237,21 +222,6 @@ namespace AMS.Migrations
                     b.HasIndex("UsersId");
 
                     b.ToTable("ApplicationUserRole");
-                });
-
-            modelBuilder.Entity("GroupUser", b =>
-                {
-                    b.Property<string>("UsersId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("GroupsId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("UsersId", "GroupsId");
-
-                    b.HasIndex("GroupsId");
-
-                    b.ToTable("GroupUser");
                 });
 
             modelBuilder.Entity("PermissionRole", b =>
@@ -271,6 +241,10 @@ namespace AMS.Migrations
 
             modelBuilder.Entity("AMS.Models.ApplicationUser", b =>
                 {
+                    b.HasOne("AMS.Models.Group", null)
+                        .WithMany("Users")
+                        .HasForeignKey("GroupId");
+
                     b.HasOne("AMS.Models.Organization", "Organization")
                         .WithMany("Users")
                         .HasForeignKey("OrganizationId");
@@ -289,8 +263,7 @@ namespace AMS.Migrations
                 {
                     b.HasOne("AMS.Models.ApplicationUser", "CreatedBy")
                         .WithMany()
-                        .HasForeignKey("CreatedById")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .HasForeignKey("CreatedById");
 
                     b.HasOne("AMS.Models.Group", null)
                         .WithMany("Groups")
@@ -333,35 +306,11 @@ namespace AMS.Migrations
                     b.Navigation("Organization");
                 });
 
-            modelBuilder.Entity("AMS.Models.Topic", b =>
-                {
-                    b.HasOne("AMS.Models.Organization", "Organization")
-                        .WithMany()
-                        .HasForeignKey("OrganizationId");
-
-                    b.Navigation("Organization");
-                });
-
             modelBuilder.Entity("ApplicationUserRole", b =>
                 {
                     b.HasOne("AMS.Models.Role", null)
                         .WithMany()
                         .HasForeignKey("RolesId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("AMS.Models.ApplicationUser", null)
-                        .WithMany()
-                        .HasForeignKey("UsersId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("GroupUser", b =>
-                {
-                    b.HasOne("AMS.Models.Group", null)
-                        .WithMany()
-                        .HasForeignKey("GroupsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -390,6 +339,8 @@ namespace AMS.Migrations
             modelBuilder.Entity("AMS.Models.Group", b =>
                 {
                     b.Navigation("Groups");
+
+                    b.Navigation("Users");
                 });
 
             modelBuilder.Entity("AMS.Models.Organization", b =>

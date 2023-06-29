@@ -6,7 +6,7 @@ namespace AMS.Interfaces
 {
     public interface IUserManager
     {
-        public ApplicationUser? GetUserById(string id, bool includeRoles = false, bool includeSchedule = false);
+        public ApplicationUser? GetUserById(string id, bool includeRoles = false, bool includeSchedule = false, bool includeGroups = false);
 
         public bool IsUniqueID(string id);
 
@@ -21,5 +21,7 @@ namespace AMS.Interfaces
         ApplicationUser GetUserByUsername(string username);
         public bool UserExists(string organizationId, string id);
         public PaginationDTO<ApplicationUser> ListUsers(UserPaginationQuery paginationQuery);
+
+        public bool CheckUsersHaveSchedule(string? scheduleId, string[] users);
     }
 }
