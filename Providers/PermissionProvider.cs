@@ -28,6 +28,16 @@ public enum PermissionEnum
     DeleteTopic,
     ListTopics,
     ReadTopic,
+    // time slot
+    AddTimeSlot,
+    DeleteTimeSlot,
+    // add session
+    ListTimeslots,
+    AddSession,
+    UpdateSession,
+    DeleteSession,
+    ListSessions,
+    ReadSession,
 
     // Define other permissions here
 }
@@ -72,5 +82,13 @@ public static class PermissionRepo
         { PermissionEnum.DeleteTopic, new AppPermission("Delete Topic", "Delete a topic") },
         { PermissionEnum.ListTopics, new AppPermission("List Topics", "List all topics") },
         { PermissionEnum.ReadTopic, new AppPermission("Read Topic", "Read a topic") },
+        { PermissionEnum.AddTimeSlot, new AppPermission("Add Time Slot", "Add a new time slot") },
+        { PermissionEnum.DeleteTimeSlot, new AppPermission("Delete Time Slot", "Delete a time slot") },
+        { PermissionEnum.ListTimeslots, new AppPermission("List Time Slots", "List all time slots") },
+        { PermissionEnum.AddSession, new AppPermission("Add Session", "Add a new session") },
+        { PermissionEnum.UpdateSession, new AppPermission("Update Session", "Update an existing session") },
+        { PermissionEnum.DeleteSession, new AppPermission("Delete Session", "Delete a session") },
+        { PermissionEnum.ListSessions, new AppPermission("List Sessions", "List all sessions") },
+        { PermissionEnum.ReadSession, new AppPermission("Read Session", "Read a session") },
     };
 }

@@ -23,6 +23,8 @@ public class Group
     public string? OrganizationId { get; set; }
     public ICollection<Group> Groups { get; set; } = new List<Group>();
     public ICollection<ApplicationUser> Users { get; set; } = new List<ApplicationUser>();
+
+    public ICollection<Session> Sessions { get; set; } = new List<Session>();
     public GroupType GroupType { get; set; }
 
     public Schedule? Schedule { get; set; }

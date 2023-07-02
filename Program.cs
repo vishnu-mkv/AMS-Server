@@ -42,6 +42,10 @@ builder.Services.AddValidatorsFromAssemblyContaining<UpdateRoleValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<AddScheduleValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<AddGroupValidaor>();
 builder.Services.AddValidatorsFromAssemblyContaining<UpdateGroupValidaor>();
+builder.Services.AddValidatorsFromAssemblyContaining<AddSessionValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<AddScheduleValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<UpdateScheduleValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<AddTimeSlotValidator>();
 // ------------
 
 
@@ -57,6 +61,10 @@ builder.Services.AddSingleton<IOrganizationProvider, OrganizationProvider>();
 builder.Services.AddScoped<IAuthManager, AuthManager>();
 builder.Services.AddScoped<IGroupManager, GroupManager>();
 builder.Services.AddScoped<ITopicManager, TopicManager>();
+builder.Services.AddScoped<ISessionManager, SessionManager>();
+builder.Services.AddScoped<IScheduleManager, ScheduleManager>();
+builder.Services.AddScoped<ISlotManager, SlotManager>();
+builder.Services.AddScoped<ITimeSlotManager, TimeSlotManager>();
 
 builder.Services.AddAuthorization();
 builder.Services.AddSingleton<IAuthorizationHandler, PermissionAuthorizationHandler>();

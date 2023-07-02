@@ -16,6 +16,8 @@ public class Topic
     [JsonIgnore]
     public Organization? Organization { get; set; }
 
+    public virtual ICollection<Session> Sessions { get; set; } = new List<Session>();
+
     public Topic()
     {
         Id = Guid.NewGuid().ToString();

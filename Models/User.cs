@@ -53,6 +53,8 @@ namespace AMS.Models
         // created at
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
+        public virtual ICollection<Session> Sessions { get; set; } = new List<Session>();
+
         // schedule
         [JsonIgnore]
         public virtual Schedule? Schedule { get; set; } = null;

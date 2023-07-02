@@ -30,6 +30,14 @@ namespace AMS.Utils
             CreateMap<PaginationDTO<ApplicationUser>, PaginationDTO<UserSummaryResponse>>();
             CreateMap<PaginationDTO<Group>, PaginationDTO<GroupSummaryResponse>>();
 
+            CreateMap<Schedule, ScheduleResponse>();
+            CreateMap<Schedule, ScheduleDetailResponse>();
+            CreateMap<Session, SessionResponse>();
+            CreateMap<Session, SessionDetailResponse>();
+            CreateMap<Slot, SlotResponse>();
+            CreateMap<TimeSlot, TimeSlotResponse>();
+            CreateMap<Topic, TopicResponse>();
+
         }
     }
 }

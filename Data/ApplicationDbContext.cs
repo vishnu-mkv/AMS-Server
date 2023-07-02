@@ -1,5 +1,7 @@
 ﻿using AMS.Models;
+using AMS.Utils;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace AMS.Data
 {
@@ -14,6 +16,21 @@ namespace AMS.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+
+            var IntValueConverter = new IntListToStringValueConverter();
+            var valueComparer = new ValueComparer<IEnumerable<int>>(
+                (c1, c2) => c1.SequenceEqual(c2),
+                c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
+                c => (IEnumerable<int>)c.ToList());
+
+            modelBuilder
+                .Entity<Schedule>()
+                .Property(e => e.Days)//Property
+                .HasConversion(IntValueConverter).Metadata.SetValueComparer(valueComparer);
+
+
+
             modelBuilder.Entity<Schedule>().HasMany(s => s.Users).WithOne(u => u.Schedule).OnDelete(DeleteBehavior.SetNull);
 
             modelBuilder.Entity<Group>().HasMany(g => g.Users).WithMany(h => h.Groups).UsingEntity(
@@ -34,7 +51,9 @@ namespace AMS.Data
         public DbSet<Role> Roles { get; set; }
         public DbSet<Schedule> Schedules { get; set; }
         public DbSet<Group> Groups { get; set; }
-
         public DbSet<Topic> Topics { get; set; }
+        public DbSet<Session> Sessions { get; set; }
+        public DbSet<TimeSlot> TimeSlots { get; set; }
+        public DbSet<Slot> Slots { get; set; }
     }
 }

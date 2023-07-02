@@ -17,6 +17,11 @@ public class TopicManager : ITopicManager
         this.authManager = authManager;
     }
 
+    public bool CheckIfTopicExists(string id, string organizationId)
+    {
+        return context.Topics.Any(t => t.Id == id && t.OrganizationId == organizationId);
+    }
+
     public Topic CreateTopic(AddTopicRequest request)
     {
         var Topic = new Topic
@@ -52,7 +57,7 @@ public class TopicManager : ITopicManager
         return true;
     }
 
-    public Topic GetTopic(string id)
+    public Topic? GetTopic(string id)
     {
         return context.Topics.FirstOrDefault(t => t.Id == id && t.OrganizationId == authManager.GetUserOrganizationId());
     }
