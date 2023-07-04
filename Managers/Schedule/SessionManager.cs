@@ -91,14 +91,50 @@ public class SessionManager : ISessionManager
 
     public Session UpdateSession(string id, AddSessionRequest updateSessionRequest)
     {
-        Session session = _context.Sessions.Include(s => s.Slots).FirstOrDefault(s => s.Id == id &&
+        Session session = _context.Sessions.Include(s => s.Slots).Include(s => s.Groups).Include(s => s.AttendanceTakers).FirstOrDefault(s => s.Id == id &&
             s.ScheduleId == updateSessionRequest.ScheduleId
         ) ?? throw new Exception("Session not found.");
 
-        session.Groups = _context.Groups.Where(g => updateSessionRequest.GroupIds.Contains(g.Id)).ToList();
-        session.AttendanceTakers = _context.Users.Where(u => updateSessionRequest.AttendanceTakerIds.Contains(u.Id)).ToList();
         var AllSlots = _slotManager.EnsureSlots(session.ScheduleId, updateSessionRequest.Slots);
         session.Slots = AllSlots;
+
+        // add groups that are not already in the session
+        foreach (var groupId in updateSessionRequest.GroupIds)
+        {
+            if (!session.Groups.Any(g => g.Id == groupId))
+            {
+                session.Groups.Add(_context.Groups.FirstOrDefault(g => g.Id == groupId) ?? throw new Exception("Group not found."));
+            }
+        }
+
+        // remove groups that are not in the request
+        foreach (var group in session.Groups)
+        {
+            if (!updateSessionRequest.GroupIds.Contains(group.Id))
+            {
+                session.Groups.Remove(group);
+            }
+        }
+
+
+        // add attendance takers that are not already in the session
+        foreach (var attendanceTakerId in updateSessionRequest.AttendanceTakerIds)
+        {
+            if (!session.AttendanceTakers.Any(u => u.Id == attendanceTakerId))
+            {
+                session.AttendanceTakers.Add(_context.Users.FirstOrDefault(u => u.Id == attendanceTakerId) ?? throw new Exception("User not found."));
+            }
+        }
+
+        // remove attendance takers that are not in the request
+        foreach (var attendanceTaker in session.AttendanceTakers)
+        {
+            if (!updateSessionRequest.AttendanceTakerIds.Contains(attendanceTaker.Id))
+            {
+                session.AttendanceTakers.Remove(attendanceTaker);
+            }
+        }
+
 
         session.TopicId = updateSessionRequest.TopicId;
 

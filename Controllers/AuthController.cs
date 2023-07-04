@@ -5,6 +5,7 @@ using AMS.Requests;
 using AMS.Responses;
 using AMS.Validators;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AMS.Controllers
@@ -19,19 +20,29 @@ namespace AMS.Controllers
         private readonly IRoleManager roleManager;
         private readonly AddRoleValidator addRoleValidator;
         private readonly UpdateRoleValidator updateRoleValidator;
+        private readonly IAuthManager authManager;
 
         public AuthController(IRoleProvider roleProvider, IMapper mapper,
-                                IRoleManager roleManager, AddRoleValidator addRoleValidator, UpdateRoleValidator updateRoleValidator)
+                                IRoleManager roleManager, AddRoleValidator addRoleValidator, UpdateRoleValidator updateRoleValidator,
+                                IAuthManager authManager)
         {
             _roleProvider = roleProvider;
             this.mapper = mapper;
             this.roleManager = roleManager;
             this.addRoleValidator = addRoleValidator;
             this.updateRoleValidator = updateRoleValidator;
+            this.authManager = authManager;
         }
 
+        // get profile
+        [HttpGet("profile")]
+        [Authorize]
+        public IActionResult GetProfile()
+        {
+            var user = authManager.GetProfile();
+            return Ok(mapper.Map<UserResponse>(user));
+        }
 
-        // get roles, permissions
 
         // roles of organization
         [HttpGet("roles")]

@@ -54,9 +54,16 @@ public class AuthManager : IAuthManager
         return organizationProvider.GetOrganizationById(organizationId) ?? throw new Exception("Organization not found.");
     }
 
+    public ApplicationUser GetProfile()
+    {
+        return dbContext.Users.Include(u => u.Organization).Include(u => u.Groups).Include(u => u.Roles)
+            .ThenInclude(r => r.Permissions).FirstOrDefault(u => u.Id == GetCurrentUserId()) ?? throw new Exception("User not found.");
+    }
+
     public LoginDTO Login(string username, string password)
     {
-        ApplicationUser user = dbContext.Users.Include(u => u.Organization).Include(u => u.Roles).ThenInclude(r => r.Permissions).FirstOrDefault(u => u.UserName == username) ?? throw new Exception("User not found.");
+        ApplicationUser user = dbContext.Users.Include(u => u.Organization).Include(u => u.Groups).Include(u => u.Roles)
+            .ThenInclude(r => r.Permissions).FirstOrDefault(u => u.UserName == username) ?? throw new Exception("User not found.");
 
         if (!passwordHasher.Verify(password, user.Password))
             throw new Exception("Invalid password.");

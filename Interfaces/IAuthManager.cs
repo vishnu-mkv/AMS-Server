@@ -9,5 +9,6 @@ public interface IAuthManager
     public string GetUserOrganizationId();
     public Organization GetUserOrganization();
     public LoginDTO Login(string username, string password);
+    public ApplicationUser GetProfile();
 
 }

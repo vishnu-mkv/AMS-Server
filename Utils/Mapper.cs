@@ -25,19 +25,22 @@ namespace AMS.Utils
             CreateMap<Schedule, ScheduleResponse>();
             CreateMap<Group, GroupResponse>();
             CreateMap<Group, GroupSummaryResponse>();
-
-            // create map for paginationDTO
-            CreateMap<PaginationDTO<ApplicationUser>, PaginationDTO<UserSummaryResponse>>();
-            CreateMap<PaginationDTO<Group>, PaginationDTO<GroupSummaryResponse>>();
-
             CreateMap<Schedule, ScheduleResponse>();
             CreateMap<Schedule, ScheduleDetailResponse>();
             CreateMap<Session, SessionResponse>();
             CreateMap<Session, SessionDetailResponse>();
+            CreateMap<Session, SessionSummaryResponse>();
             CreateMap<Slot, SlotResponse>();
             CreateMap<TimeSlot, TimeSlotResponse>();
             CreateMap<Topic, TopicResponse>();
+            CreateMap<Attendance, AttendanceResponse>();
+            CreateMap<Attendance, AttendanceSummaryResponse>();
+            CreateMap<Record, RecordResponse>();
 
+            // create map for paginationDTO
+            CreateMap<PaginationDTO<ApplicationUser>, PaginationDTO<UserSummaryResponse>>();
+            CreateMap<PaginationDTO<Group>, PaginationDTO<GroupSummaryResponse>>();
+            CreateMap<PaginationDTO<Attendance>, PaginationDTO<AttendanceSummaryResponse>>();
         }
     }
 }

@@ -55,3 +55,19 @@ public class GroupPaginationQuery : PaginationQuery
     // group type
     public GroupType GroupType { get; set; } = GroupType.GroupOfUsers;
 }
+
+
+public class AttendancePaginationQuery : PaginationQuery
+{
+    public string? SessionId { get; set; } = null;
+
+    public string? GroupId { get; set; } = null;
+
+    public DateTime? RecorderForDate { get; set; } = null;
+
+    public string? TimeSlotId { get; set; } = null;
+
+    public string? ScheduleId { get; set; } = null;
+
+    public string? AttendanceTakerId { get; set; } = null;
+}

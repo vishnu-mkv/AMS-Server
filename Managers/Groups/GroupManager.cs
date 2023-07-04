@@ -4,6 +4,7 @@ using AMS.Interfaces;
 using AMS.Requests;
 using Microsoft.EntityFrameworkCore;
 using AMS.DTO;
+using AMS.Migrations;
 
 namespace AMS.Managers;
 
@@ -129,6 +130,12 @@ public class GroupManager : IGroupManager
         }
 
         return group;
+    }
+
+    public bool CheckIfUsersBelongToGroup(string groupId, string[] userIds)
+    {
+        // check if all users belong to the group
+        return context.Users.Include(u => u.Groups).Count(w => userIds.Contains(w.Id) && w.Groups.Contains(new Group { Id = groupId })) == userIds.Length;
     }
 
     public PaginationDTO<Group> GetGroups(GroupPaginationQuery paginationQuery)

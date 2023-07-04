@@ -79,7 +79,7 @@ public class RoleProvider : IRoleProvider
         return roleIds.All(RoleExists);
     }
 
-    public List<Permission> GetPermissionsById(PermissionEnum[] permissionEnums)
+    public List<Permission?> GetPermissionsById(PermissionEnum[] permissionEnums)
     {
         // convert enum to permission 
         return permissionEnums.Select(permissionEnum => Permissions.GetValueOrDefault(new Permission(permissionEnum).Id)).ToList();

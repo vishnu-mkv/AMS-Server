@@ -10,9 +10,9 @@ public class Session
 
     public ICollection<Slot> Slots { get; set; } = new List<Slot>();
 
-    public string ScheduleId { get; set; }
+    public string? ScheduleId { get; set; }
 
-    public virtual Schedule Schedule { get; set; }
+    public virtual Schedule? Schedule { get; set; }
 
     public ICollection<Group> Groups { get; set; } = new List<Group>();
 

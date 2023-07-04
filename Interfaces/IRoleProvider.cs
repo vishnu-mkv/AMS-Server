@@ -12,7 +12,7 @@ namespace AMS.Interfaces
 
         bool CheckRolesExists(string[] roleIds);
         IEnumerable<Permission> GetPermissions(string[] roleIds);
-        List<Permission> GetPermissionsById(PermissionEnum[] permissions);
+        List<Permission?> GetPermissionsById(PermissionEnum[] permissions);
         List<Role> GetRolesByIds(string[] roleId);
 
         Task<Role> CreateRole(string name, string description, List<Permission> permissions, Organization organization);

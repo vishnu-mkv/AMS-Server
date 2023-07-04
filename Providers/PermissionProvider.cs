@@ -38,6 +38,14 @@ public enum PermissionEnum
     DeleteSession,
     ListSessions,
     ReadSession,
+    // add attendance
+    GetAttendance,
+    ListAttendances,
+    AddAttendance,
+    UpdateAttendance,
+    ReadAttendance,
+    DeleteAttendance,
+    ListAttendanceStatuses
 
     // Define other permissions here
 }
@@ -90,5 +98,12 @@ public static class PermissionRepo
         { PermissionEnum.DeleteSession, new AppPermission("Delete Session", "Delete a session") },
         { PermissionEnum.ListSessions, new AppPermission("List Sessions", "List all sessions") },
         { PermissionEnum.ReadSession, new AppPermission("Read Session", "Read a session") },
+        { PermissionEnum.GetAttendance, new AppPermission("Get Attendance", "Get attendance") },
+        { PermissionEnum.ListAttendances, new AppPermission("List Attendances", "List all attendances") },
+        { PermissionEnum.AddAttendance, new AppPermission("Add Attendance", "Add a new attendance") },
+        { PermissionEnum.UpdateAttendance, new AppPermission("Update Attendance", "Update an existing attendance") },
+        { PermissionEnum.ReadAttendance, new AppPermission("Read Attendance", "Read an attendance") },
+        { PermissionEnum.DeleteAttendance, new AppPermission("Delete Attendance", "Delete an attendance") },
+        { PermissionEnum.ListAttendanceStatuses, new AppPermission("List Attendance Statuses", "List all attendance statuses") }
     };
 }

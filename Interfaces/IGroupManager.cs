@@ -17,4 +17,5 @@ public interface IGroupManager
     public bool CheckIfAllUsersHaveSameSchedule(string scheduleId, string[] userId);
 
     public PaginationDTO<Group> GetGroups(GroupPaginationQuery paginationQuery);
+    public bool CheckIfUsersBelongToGroup(string groupId, string[] userIds);
 }

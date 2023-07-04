@@ -22,7 +22,7 @@ namespace AMS.Data
             var valueComparer = new ValueComparer<IEnumerable<int>>(
                 (c1, c2) => c1.SequenceEqual(c2),
                 c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
-                c => (IEnumerable<int>)c.ToList());
+                c => c.ToList());
 
             modelBuilder
                 .Entity<Schedule>()
@@ -55,5 +55,8 @@ namespace AMS.Data
         public DbSet<Session> Sessions { get; set; }
         public DbSet<TimeSlot> TimeSlots { get; set; }
         public DbSet<Slot> Slots { get; set; }
+        public DbSet<AttendanceStatus> AttendanceStatuses { get; set; }
+        public DbSet<Attendance> Attendances { get; set; }
+        public DbSet<Record> Records { get; set; }
     }
 }

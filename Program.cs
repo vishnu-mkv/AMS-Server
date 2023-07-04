@@ -46,18 +46,21 @@ builder.Services.AddValidatorsFromAssemblyContaining<AddSessionValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<AddScheduleValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<UpdateScheduleValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<AddTimeSlotValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<AddAttendanceValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<UpdateAttendanceValidator>();
 // ------------
 
 
 builder.Services.AddSingleton<ISecurePasswordHasher, PasswordHasher>();
 builder.Services.AddSingleton<IFileManager, LocalFileManager>();
 builder.Services.AddSingleton<IJwtProvider, JwtProvider>();
-
 builder.Services.AddSingleton<IRoleProvider, RoleProvider>();
+builder.Services.AddSingleton<IOrganizationProvider, OrganizationProvider>();
+builder.Services.AddSingleton<IAttendanceStatusProvider, AttendanceStatusProvider>();
+
 builder.Services.AddScoped<IRoleManager, RoleManager>();
 builder.Services.AddScoped<IUserManager, UserManager>();
 builder.Services.AddScoped<IScheduleManager, ScheduleManager>();
-builder.Services.AddSingleton<IOrganizationProvider, OrganizationProvider>();
 builder.Services.AddScoped<IAuthManager, AuthManager>();
 builder.Services.AddScoped<IGroupManager, GroupManager>();
 builder.Services.AddScoped<ITopicManager, TopicManager>();
@@ -65,6 +68,7 @@ builder.Services.AddScoped<ISessionManager, SessionManager>();
 builder.Services.AddScoped<IScheduleManager, ScheduleManager>();
 builder.Services.AddScoped<ISlotManager, SlotManager>();
 builder.Services.AddScoped<ITimeSlotManager, TimeSlotManager>();
+builder.Services.AddScoped<IAttendanceManager, AttendanceManager>();
 
 builder.Services.AddAuthorization();
 builder.Services.AddSingleton<IAuthorizationHandler, PermissionAuthorizationHandler>();
@@ -162,5 +166,8 @@ permissionsSeeder.Seed();
 
 var adminSeeder = new AdminUserSeeder(app.Services);
 adminSeeder.Seed();
+
+var AttendanceStatusSeeder = new AttendanceStatusSeeder(app.Services);
+AttendanceStatusSeeder.Seed();
 
 app.Run();
