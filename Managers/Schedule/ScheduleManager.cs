@@ -79,7 +79,7 @@ public class ScheduleManager : IScheduleManager
         if (populate)
         {
             schedule.TimeSlots = _context.TimeSlots.Where(x => x.ScheduleId == schedule.Id).ToList();
-            schedule.Sessions = _context.Sessions.Where(x => x.ScheduleId == schedule.Id).Include(x => x.Slots).ToList();
+            schedule.Sessions = _context.Sessions.Where(x => x.ScheduleId == schedule.Id).Include(x => x.Slots).Include(x => x.Topic).ToList();
         }
 
         return schedule;

@@ -51,9 +51,9 @@ public class GroupPaginationQuery : PaginationQuery
 {
     // scheduleId
 
-    public string? ScheduleId { get; set; } = null;
+    public string[]? ScheduleId { get; set; } = null;
     // group type
-    public GroupType GroupType { get; set; } = GroupType.GroupOfUsers;
+    public GroupType? GroupType { get; set; } = null;
 }
 
 

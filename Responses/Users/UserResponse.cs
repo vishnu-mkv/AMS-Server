@@ -33,5 +33,7 @@ namespace AMS.Responses
         public RoleResponse[] Roles { get; set; } = Array.Empty<RoleResponse>();
 
         public GroupSummaryResponse[] Groups { get; set; } = Array.Empty<GroupSummaryResponse>();
+
+        public string? ScheduleId { get; set; }
     }
 }

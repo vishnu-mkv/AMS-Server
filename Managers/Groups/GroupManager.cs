@@ -147,6 +147,11 @@ public class GroupManager : IGroupManager
             queryable = queryable.Where(w => w.Name.Contains(paginationQuery.Search));
         }
 
+        if (paginationQuery.GroupType is not null)
+        {
+            queryable = queryable.Where(w => w.GroupType == paginationQuery.GroupType);
+        }
+
         // sort order and sort by
         queryable = paginationQuery.Order switch
         {
@@ -171,7 +176,7 @@ public class GroupManager : IGroupManager
         queryable = paginationQuery.ScheduleId switch
         {
             null => queryable,
-            _ => queryable.Where(w => w.ScheduleId == paginationQuery.ScheduleId)
+            _ => queryable.Where(w => paginationQuery.ScheduleId.Any(s => s == w.ScheduleId))
         };
 
         // pagination

@@ -118,9 +118,9 @@ public class ScheduleController : ControllerBase
 
     // get, create, update, delete session
     [HttpPost]
-    [Route("{id}/sessions")]
+    [Route("sessions")]
     [HasPermission(PermissionEnum.AddSession)]
-    public IActionResult AddSession([FromBody] AddSessionRequest request, [FromRoute] string id)
+    public IActionResult AddSession([FromBody] AddSessionRequest request)
     {
         var validationResult = addSessionValidator.Validate(request);
 
@@ -129,14 +129,14 @@ public class ScheduleController : ControllerBase
             return BadRequest(validationResult.Errors);
         }
 
-        var session = sessionManager.AddSession(request, id);
+        var session = sessionManager.AddSession(request, request.ScheduleId);
         return Ok(mapper.Map<SessionResponse>(session));
     }
 
     [HttpPut]
-    [Route("{id}/sessions/{sessionId}")]
+    [Route("sessions/{sessionId}")]
     [HasPermission(PermissionEnum.UpdateSession)]
-    public IActionResult UpdateSession([FromBody] AddSessionRequest request, [FromRoute] string id, [FromRoute] string sessionId)
+    public IActionResult UpdateSession([FromBody] AddSessionRequest request, [FromRoute] string sessionId)
     {
         var validationResult = addSessionValidator.Validate(request);
 
@@ -150,7 +150,7 @@ public class ScheduleController : ControllerBase
     }
 
     [HttpDelete]
-    [Route("{id}/sessions/{sessionId}")]
+    [Route("sessions/{sessionId}")]
     [HasPermission(PermissionEnum.DeleteSession)]
     public IActionResult DeleteSession([FromRoute] string sessionId)
     {
@@ -159,7 +159,7 @@ public class ScheduleController : ControllerBase
     }
 
     [HttpGet]
-    [Route("{id}/sessions/{sessionId}")]
+    [Route("sessions/{sessionId}")]
     [HasPermission(PermissionEnum.ReadSession)]
     public IActionResult GetSession([FromRoute] string sessionId)
     {
