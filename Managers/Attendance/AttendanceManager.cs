@@ -151,17 +151,17 @@ public class AttendanceManager : IAttendanceManager
 
         if (paginationQuery.GroupId != null)
         {
-            query = query.Where(x => x.GroupId == paginationQuery.GroupId);
+            query = query.Where(x => paginationQuery.GroupId.Contains(x.GroupId));
         }
 
         if (paginationQuery.SessionId != null)
         {
-            query = query.Where(x => x.SessionId == paginationQuery.SessionId);
+            query = query.Where(x => paginationQuery.SessionId.Contains(x.SessionId));
         }
 
-        if (paginationQuery.RecorderForDate != null)
+        if (paginationQuery.RecordedForDate != null)
         {
-            query = query.Where(x => x.RecordedFor.Date == ((DateTime)paginationQuery.RecorderForDate).Date);
+            query = query.Where(x => x.RecordedFor.Date == ((DateTime)paginationQuery.RecordedForDate).Date);
         }
 
         if (paginationQuery.ScheduleId != null)
@@ -171,7 +171,7 @@ public class AttendanceManager : IAttendanceManager
 
         if (paginationQuery.TimeSlotId != null)
         {
-            query = query.Include(x => x.Slot).Where(x => x.Slot.TimeSlotId == paginationQuery.TimeSlotId);
+            query = query.Include(x => x.Slot).Where(x => x.Slot != null && paginationQuery.TimeSlotId.Contains(x.Slot.TimeSlotId));
         }
 
         if (paginationQuery.AttendanceTakerId != null)
@@ -208,16 +208,18 @@ public class AttendanceManager : IAttendanceManager
 
         foreach (var entry in request.AttendanceEntries)
         {
-            var record = attendance.Records.FirstOrDefault(x => x.UserId == entry.UserId);
+            var record = context.Records.FirstOrDefault(x => x.AttendanceId == attendance.Id && x.UserId == entry.UserId);
+
+            Console.WriteLine("record: " + record?.UserId + " " + record?.AttendanceStatusId);
 
             if (record == null)
             {
-                attendance.Records.Add(new Record
-                {
-                    AttendanceId = attendance.Id,
-                    UserId = entry.UserId,
-                    AttendanceStatusId = entry.AttendanceStatusId
-                });
+                // attendance.Records.Add(new Record
+                // {
+                //     AttendanceId = attendance.Id,
+                //     UserId = entry.UserId,
+                //     AttendanceStatusId = entry.AttendanceStatusId
+                // });
             }
             else
             {

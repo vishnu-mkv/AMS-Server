@@ -17,6 +17,6 @@ namespace AMS.Responses
 
         public TimeSlotResponse[] TimeSlots { get; set; }
 
-        public SessionResponse[] Sessions { get; set; }
+        public SessionDetailResponse[] Sessions { get; set; }
     }
 }

@@ -73,14 +73,16 @@ public class ScheduleManager : IScheduleManager
 
     public Schedule? GetSchedule(string id, bool populate = false)
     {
-        var schedule = _context.Schedules.FirstOrDefault(x => x.Id == id && x.OrganizationId == _authManager.GetUserOrganizationId());
-        if (schedule == null) return null;
+        var schedules = _context.Schedules.AsQueryable();
 
         if (populate)
         {
-            schedule.TimeSlots = _context.TimeSlots.Where(x => x.ScheduleId == schedule.Id).ToList();
-            schedule.Sessions = _context.Sessions.Where(x => x.ScheduleId == schedule.Id).Include(x => x.Slots).Include(x => x.Topic).ToList();
+            schedules = schedules.Include(s => s.Sessions).ThenInclude(s => s.Slots)
+                .Include(s => s.Sessions).ThenInclude(s => s.Groups).Include(s => s.Sessions).ThenInclude(s => s.AttendanceTakers)
+                .Include(s => s.Sessions).ThenInclude(s => s.Topic);
         }
+
+        var schedule = schedules.Include(s => s.TimeSlots).FirstOrDefault(s => s.Id == id && s.OrganizationId == _authManager.GetUserOrganizationId());
 
         return schedule;
     }

@@ -118,21 +118,16 @@ public class SessionManager : ISessionManager
 
 
         // add attendance takers that are not already in the session
-        foreach (var attendanceTakerId in updateSessionRequest.AttendanceTakerIds)
+        if (updateSessionRequest.AttendanceTakerIds != null)
         {
-            if (!session.AttendanceTakers.Any(u => u.Id == attendanceTakerId))
-            {
-                session.AttendanceTakers.Add(_context.Users.FirstOrDefault(u => u.Id == attendanceTakerId) ?? throw new Exception("User not found."));
-            }
-        }
 
-        // remove attendance takers that are not in the request
-        foreach (var attendanceTaker in session.AttendanceTakers)
-        {
-            if (!updateSessionRequest.AttendanceTakerIds.Contains(attendanceTaker.Id))
+            var newAttendanceTakers = _context.Users.Where(u => updateSessionRequest.AttendanceTakerIds.Contains(u.Id)).ToList();
+            if (newAttendanceTakers.Count != updateSessionRequest.AttendanceTakerIds.Length)
             {
-                session.AttendanceTakers.Remove(attendanceTaker);
+                throw new Exception("Attendance taker not found.");
             }
+
+            session.AttendanceTakers = newAttendanceTakers;
         }
 
 
