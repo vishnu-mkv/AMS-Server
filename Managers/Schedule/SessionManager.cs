@@ -98,22 +98,16 @@ public class SessionManager : ISessionManager
         var AllSlots = _slotManager.EnsureSlots(session.ScheduleId, updateSessionRequest.Slots);
         session.Slots = AllSlots;
 
-        // add groups that are not already in the session
-        foreach (var groupId in updateSessionRequest.GroupIds)
+        // update groups
+        if (updateSessionRequest.GroupIds != null)
         {
-            if (!session.Groups.Any(g => g.Id == groupId))
+            var newGroups = _context.Groups.Where(g => updateSessionRequest.GroupIds.Contains(g.Id)).ToList();
+            if (newGroups.Count != updateSessionRequest.GroupIds.Length)
             {
-                session.Groups.Add(_context.Groups.FirstOrDefault(g => g.Id == groupId) ?? throw new Exception("Group not found."));
+                throw new Exception("Group not found.");
             }
-        }
 
-        // remove groups that are not in the request
-        foreach (var group in session.Groups)
-        {
-            if (!updateSessionRequest.GroupIds.Contains(group.Id))
-            {
-                session.Groups.Remove(group);
-            }
+            session.Groups = newGroups;
         }
 
 
