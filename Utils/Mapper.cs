@@ -35,12 +35,14 @@ namespace AMS.Utils
             CreateMap<Topic, TopicResponse>();
             CreateMap<Attendance, AttendanceResponse>();
             CreateMap<Attendance, AttendanceSummaryResponse>();
+            CreateMap<Attendance, AttendanceResponseWithoutRecords>();
             CreateMap<Record, RecordResponse>();
 
             // create map for paginationDTO
             CreateMap<PaginationDTO<ApplicationUser>, PaginationDTO<UserSummaryResponse>>();
             CreateMap<PaginationDTO<Group>, PaginationDTO<GroupSummaryResponse>>();
             CreateMap<PaginationDTO<Attendance>, PaginationDTO<AttendanceSummaryResponse>>();
+            CreateMap<PaginationDTO<Attendance>, PaginationDTO<AttendanceResponseWithoutRecords>>();
         }
     }
 }

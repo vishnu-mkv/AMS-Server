@@ -147,7 +147,14 @@ public class AttendanceManager : IAttendanceManager
 
     public PaginationDTO<Attendance> ListAttendances(AttendancePaginationQuery paginationQuery)
     {
-        var query = context.Attendances.AsQueryable();
+        var query = context.Attendances.Include(x => x.Group).Include(x => x.Session)
+            .ThenInclude(x => x.Topic).Include(x => x.Slot).ThenInclude(x => x.TimeSlot)
+            .Include(x => x.Schedule).AsQueryable();
+
+        if (paginationQuery.TopicId != null)
+        {
+            query = query.Where(x => x.Session != null && paginationQuery.TopicId.Contains(x.Session.TopicId));
+        }
 
         if (paginationQuery.GroupId != null)
         {
@@ -177,6 +184,16 @@ public class AttendanceManager : IAttendanceManager
         if (paginationQuery.AttendanceTakerId != null)
         {
             query = query.Include(x => x.Session).ThenInclude(x => x.AttendanceTakers).Where(x => x.Session.AttendanceTakers.Any(x => x.Id == paginationQuery.AttendanceTakerId));
+        }
+
+        if (paginationQuery.StartDate != null)
+        {
+            query = query.Where(x => x.RecordedFor.Date >= ((DateTime)paginationQuery.StartDate).Date);
+        }
+
+        if (paginationQuery.EndDate != null)
+        {
+            query = query.Where(x => x.RecordedFor.Date <= ((DateTime)paginationQuery.EndDate).Date);
         }
 
         // sort

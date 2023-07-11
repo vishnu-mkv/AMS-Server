@@ -49,7 +49,7 @@ public class AttendanceController : ControllerBase
     )
     {
         var attendances = _attendanceManager.ListAttendances(AttendanceQuery);
-        return Ok(_mapper.Map<PaginationDTO<AttendanceSummaryResponse>>(attendances));
+        return Ok(_mapper.Map<PaginationDTO<AttendanceResponseWithoutRecords>>(attendances));
     }
 
     [HttpPost]

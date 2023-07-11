@@ -59,13 +59,13 @@ public class GroupPaginationQuery : PaginationQuery
 
 public class AttendancePaginationQuery : PaginationQuery
 {
-    public string[] SessionId { get; set; } = null;
+    public string[]? SessionId { get; set; } = null;
 
-    public string[] GroupId { get; set; } = null;
+    public string[]? GroupId { get; set; } = null;
 
     public DateTime? RecordedForDate { get; set; } = null;
 
-    public string[] TimeSlotId { get; set; } = null;
+    public string[]? TimeSlotId { get; set; } = null;
 
     public string? ScheduleId { get; set; } = null;
 
@@ -74,4 +74,5 @@ public class AttendancePaginationQuery : PaginationQuery
     public DateTime? StartDate { get; set; } = null;
 
     public DateTime? EndDate { get; set; } = null;
+    public string[]? TopicId { get; set; } = null;
 }
