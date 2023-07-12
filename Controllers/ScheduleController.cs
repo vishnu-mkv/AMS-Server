@@ -107,10 +107,26 @@ public class ScheduleController : ControllerBase
         return Ok(mapper.Map<TimeSlotResponse>(schedule));
     }
 
+    [HttpPut]
+    [Route("{id}/timeslots/{timeSlotId}")]
+    [HasPermission(PermissionEnum.UpdateTimeSlot)]
+    public IActionResult UpdateTimeSlot([FromBody] AddTimeSlotRequest request, [FromRoute] string id, [FromRoute] string timeSlotId)
+    {
+        var validationResult = addTimeSlotValidator.Validate(request);
+
+        if (!validationResult.IsValid)
+        {
+            return BadRequest(validationResult.Errors);
+        }
+
+        var schedule = timeSlotManager.UpdateTimeSlot(timeSlotId, request);
+        return Ok(mapper.Map<TimeSlotResponse>(schedule));
+    }
+
     [HttpDelete]
     [Route("{id}/timeslots/{timeSlotId}")]
     [HasPermission(PermissionEnum.DeleteTimeSlot)]
-    public IActionResult DeleteTimeSlot([FromRoute] string id, [FromRoute] string timeSlotId)
+    public IActionResult DeleteTimeSlot([FromRoute] string timeSlotId)
     {
         timeSlotManager.DeleteTimeSlot(timeSlotId);
         return Ok(true);
@@ -165,4 +181,6 @@ public class ScheduleController : ControllerBase
     {
         return Ok(mapper.Map<SessionDetailResponse>(sessionManager.GetSession(sessionId, true)));
     }
+
+
 }

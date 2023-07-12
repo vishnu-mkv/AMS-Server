@@ -14,6 +14,5 @@ public class AddGroupRequest
     public string[]? Users { get; set; }
     public string[]? Groups { get; set; }
 
-    [Required]
-    public string ScheduleId { get; set; } = null!;
+    public string? ScheduleId { get; set; } = null!;
 }

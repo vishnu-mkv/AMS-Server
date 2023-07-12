@@ -30,9 +30,10 @@ public enum PermissionEnum
     ReadTopic,
     // time slot
     AddTimeSlot,
+    UpdateTimeSlot,
     DeleteTimeSlot,
-    // add session
     ListTimeslots,
+    // add session
     AddSession,
     UpdateSession,
     DeleteSession,
@@ -92,6 +93,7 @@ public static class PermissionRepo
         { PermissionEnum.ReadTopic, new AppPermission("Read Topic", "Read a topic") },
         { PermissionEnum.AddTimeSlot, new AppPermission("Add Time Slot", "Add a new time slot") },
         { PermissionEnum.DeleteTimeSlot, new AppPermission("Delete Time Slot", "Delete a time slot") },
+        { PermissionEnum.UpdateTimeSlot, new AppPermission("Update Time Slot", "Update an existing time slot") },
         { PermissionEnum.ListTimeslots, new AppPermission("List Time Slots", "List all time slots") },
         { PermissionEnum.AddSession, new AppPermission("Add Session", "Add a new session") },
         { PermissionEnum.UpdateSession, new AppPermission("Update Session", "Update an existing session") },
@@ -105,5 +107,6 @@ public static class PermissionRepo
         { PermissionEnum.ReadAttendance, new AppPermission("Read Attendance", "Read an attendance") },
         { PermissionEnum.DeleteAttendance, new AppPermission("Delete Attendance", "Delete an attendance") },
         { PermissionEnum.ListAttendanceStatuses, new AppPermission("List Attendance Statuses", "List all attendance statuses") }
+
     };
 }

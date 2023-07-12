@@ -14,7 +14,7 @@ public class AddGroupValidaor : AbstractValidator<AddGroupRequest>
         RuleFor(x => x.GroupType).IsInEnum().WithMessage("GroupType is required");
         // when group type is GroupOfUsers, users must be provided else users should be null
 
-        RuleFor(x => x.ScheduleId).NotEmpty().WithMessage("ScheduleId is required").SetValidator(
+        RuleFor(x => x.ScheduleId).SetValidator(
             new ScheduleIdValidator<AddGroupRequest>(scheduleManager, authManager)
         );
 

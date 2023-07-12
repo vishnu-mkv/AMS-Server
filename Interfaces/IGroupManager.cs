@@ -18,4 +18,5 @@ public interface IGroupManager
 
     public PaginationDTO<Group> GetGroups(GroupPaginationQuery paginationQuery);
     public bool CheckIfUsersBelongToGroup(string groupId, string[] userIds);
+    public void PopulateScheduleId(ICollection<Group> groups, string scheduleId, int level = 10);
 }

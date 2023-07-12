@@ -39,13 +39,34 @@ public class GroupManager : IGroupManager
         }
     }
 
-    private void PopulateScheduleId(ICollection<Group> groups, string scheduleId)
+    public void PopulateScheduleId(ICollection<Group> groups, string scheduleId, int level = 10)
     {
+
+        if (level == 0)
+        {
+            throw new Exception("Too many levels of groups");
+        }
+
         foreach (var group in groups)
         {
             if (group.ScheduleId == null)
             {
                 group.ScheduleId = scheduleId;
+            }
+            else
+            {
+                throw new Exception("Group already has a schedule");
+            }
+
+            var _group = context.Groups.Where(w => w.Id == group.Id).Include(i => i.Users).Include(i => i.Groups).FirstOrDefault();
+
+            if (group.GroupType == GroupType.GroupOfUsers)
+            {
+                PopulateScheduleId(_group.Users, scheduleId);
+            }
+            else
+            {
+                PopulateScheduleId(_group.Groups, scheduleId, level - 1);
             }
         }
     }
@@ -176,7 +197,7 @@ public class GroupManager : IGroupManager
         queryable = paginationQuery.ScheduleId switch
         {
             null => queryable,
-            _ => queryable.Where(w => paginationQuery.ScheduleId.Any(s => s == w.ScheduleId))
+            _ => queryable.Where(w => paginationQuery.ScheduleId.Any(s => s == w.ScheduleId) || (w.ScheduleId == null && paginationQuery.ScheduleId.Contains("null")))
         };
 
         // pagination

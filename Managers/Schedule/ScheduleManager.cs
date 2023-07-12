@@ -12,12 +12,14 @@ public class ScheduleManager : IScheduleManager
     private readonly ApplicationDbContext _context;
     private readonly IAuthManager _authManager;
     private readonly ISessionManager _sessionManager;
+    private readonly IServiceProvider _serviceProvider;
 
-    public ScheduleManager(ApplicationDbContext context, IAuthManager authManager, ISessionManager sessionManager)
+    public ScheduleManager(ApplicationDbContext context, IAuthManager authManager, ISessionManager sessionManager, IServiceProvider serviceProvider)
     {
         _context = context;
         _authManager = authManager;
         _sessionManager = sessionManager;
+        _serviceProvider = serviceProvider;
     }
 
     public Schedule AddSchedule(AddScheduleRequest addScheduleRequest)
@@ -37,6 +39,16 @@ public class ScheduleManager : IScheduleManager
 
         _context.Schedules.Add(schedule);
         _context.SaveChanges();
+
+        if (addScheduleRequest.TimeSlots?.Length > 0)
+        {
+            var _timeSlotManager = (ITimeSlotManager)_serviceProvider.GetService(typeof(ITimeSlotManager));
+
+            foreach (var timeSlot in addScheduleRequest.TimeSlots)
+            {
+                _timeSlotManager.AddTimeSlot(timeSlot, schedule.Id);
+            }
+        }
 
         return schedule;
     }

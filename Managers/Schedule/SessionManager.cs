@@ -10,15 +10,35 @@ public class SessionManager : ISessionManager
 {
     private readonly ApplicationDbContext _context;
     private readonly ISlotManager _slotManager;
+    private readonly IGroupManager _groupManager;
 
-    public SessionManager(ApplicationDbContext context, ISlotManager slotManager)
+    public SessionManager(ApplicationDbContext context, ISlotManager slotManager, IGroupManager groupManager)
     {
         _context = context;
         _slotManager = slotManager;
+        _groupManager = groupManager;
+    }
+
+    private void GroupScheduleCheck(string scheduleId, string[] groupIds)
+    {
+        // check if all groups have the same schedule
+        if (!_groupManager.CheckIfAllGroupsHaveSameSchedule(scheduleId, groupIds))
+        {
+            throw new Exception("All groups must have the same schedule.");
+        }
+
+
+        var groupsWithNoSchedule = _context.Groups.Where(g => g.ScheduleId == null && groupIds.Contains(g.Id)).ToList();
+
+        _groupManager.PopulateScheduleId(groupsWithNoSchedule, scheduleId);
+
     }
 
     public Session AddSession(AddSessionRequest addSessionRequest, string scheduleId)
     {
+
+        GroupScheduleCheck(scheduleId, addSessionRequest.GroupIds);
+
         Session session = new()
         {
             ScheduleId = scheduleId,
@@ -94,6 +114,8 @@ public class SessionManager : ISessionManager
         Session session = _context.Sessions.Include(s => s.Slots).Include(s => s.Groups).Include(s => s.AttendanceTakers).FirstOrDefault(s => s.Id == id &&
             s.ScheduleId == updateSessionRequest.ScheduleId
         ) ?? throw new Exception("Session not found.");
+
+        GroupScheduleCheck(updateSessionRequest.ScheduleId, updateSessionRequest.GroupIds);
 
         var AllSlots = _slotManager.EnsureSlots(session.ScheduleId, updateSessionRequest.Slots);
         session.Slots = AllSlots;
