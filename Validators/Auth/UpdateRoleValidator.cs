@@ -19,8 +19,8 @@ public class UpdateRoleValidator : AbstractValidator<UpdateRoleRequest>
             authManager, userManager
         ));
 
-        RuleFor(x => x.Color)
-            .MustBeHexColor();
+        // RuleFor(x => x.Color)
+        //     .MustBeHexColor();
 
         RuleFor(x => x.Description)
             .MinimumLength(1).WithMessage("Description cannot be empty.").MaximumLength(1000).WithMessage("Description cannot exceed 1000 characters.");

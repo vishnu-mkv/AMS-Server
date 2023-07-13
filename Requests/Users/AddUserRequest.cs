@@ -33,5 +33,8 @@ namespace AMS.Requests
 
         // schedule id
         public string? ScheduleId { get; set; }
+
+        // group ids
+        public string[]? GroupIds { get; set; }
     }
 }

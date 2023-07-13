@@ -8,7 +8,7 @@ namespace AMS.Validators;
 public class UpdateUserValidator : AbstractValidator<UpdateUserRequest>
 {
     public UpdateUserValidator(IRoleProvider rolePermissionProvider, IAuthManager authManager, IUserManager userManager,
-                            IServiceScopeFactory serviceScopeFactory, IScheduleManager scheduleManager)
+                            IServiceScopeFactory serviceScopeFactory, IScheduleManager scheduleManager, IGroupManager groupManager)
     {
         var max = 20;
         RuleFor(x => x.FirstName).Length(2, max).WithMessage("First name is required.");
@@ -31,6 +31,9 @@ public class UpdateUserValidator : AbstractValidator<UpdateUserRequest>
 
         RuleFor(x => x.ScheduleId)
             .SetValidator(new ScheduleIdValidator<UpdateUserRequest>(scheduleManager, authManager));
+
+        RuleFor(x => x.GroupIds)
+            .SetValidator(new GroupsValidator<UpdateUserRequest>(authManager, groupManager));
     }
 
     private static bool CheckIfSignInAllowed(IUserManager userManager, IServiceScopeFactory scopeFactory, UpdateUserRequest x)

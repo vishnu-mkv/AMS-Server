@@ -91,6 +91,7 @@ namespace AMS.Controllers
         [HasPermission(PermissionEnum.UpdateUser)]
         public ActionResult<UserResponse> UpdateUser([FromForm] UpdateUserRequest request, [FromRoute] string id)
         {
+            Console.WriteLine("here" + request.GroupIds[0]);
             var result = _updateUserValidator.Validate(request);
 
             if (!result.IsValid)
@@ -109,7 +110,7 @@ namespace AMS.Controllers
         [Route("{id}")]
         public ActionResult<ApplicationUser> GetUser([FromRoute] string id)
         {
-            var user = _userManager.GetUserById(id, includeRoles: true, includeGroups: true);
+            var user = _userManager.GetUserById(id, includeRoles: true, includeGroups: true, includeSchedule: true);
 
             return Ok(_mapper.Map<UserResponse>(user));
         }

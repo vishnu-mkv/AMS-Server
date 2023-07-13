@@ -32,9 +32,6 @@ public class AddRoleValidator : AbstractValidator<AddRoleRequest>
             authManager, userManager
         ));
 
-        RuleFor(x => x.Color)
-            .MustBeHexColor();
-
         RuleFor(x => x.Description)
             .NotEmpty().WithMessage("Description cannot be empty.").MaximumLength(1000).WithMessage("Description cannot exceed 1000 characters.");
     }

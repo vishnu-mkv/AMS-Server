@@ -34,7 +34,7 @@ public class RolesValidator<T> : PropertyValidator<T, string[]>
                rolePermissionProvider.GetRolesByIds(value).TrueForAll(r =>
                {
                    string id = authManager.GetUserOrganization().Id;
-                   return r.Organization.Id == id;
+                   return r.OrganizationId == id;
                });
 
     }

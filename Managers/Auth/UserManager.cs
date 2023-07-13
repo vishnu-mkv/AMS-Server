@@ -1,10 +1,12 @@
 ﻿using AMS.Data;
 using AMS.DTO;
 using AMS.Interfaces;
+using AMS.Migrations;
 using AMS.Models;
 using AMS.Requests;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System.Globalization;
 
 namespace AMS.Managers.Auth
@@ -74,6 +76,24 @@ namespace AMS.Managers.Auth
             return schedule;
         }
 
+        private void CheckGroupScheduleId(ApplicationUser user, string[] GroupIds)
+        {
+            var groups = dbContext.Groups.Where(g => GroupIds.Contains(g.Id)).Include(g => g.Schedule).Distinct().ToList();
+
+            // select shcedules from the groups
+            var schedules = groups.Select(g => g.ScheduleId).Distinct().ToList();
+
+            // check if the user has a schedule
+            if (schedules.Count > 1) throw new Exception("User can not be in groups with different schedules.");
+
+
+            if (user.ScheduleId != null && schedules[0] != user.ScheduleId) throw new Exception("User schedule does not match the group schedules.");
+
+            if (user.Schedule == null) user.ScheduleId = schedules[0];
+
+            user.Groups = groups;
+        }
+
         public ApplicationUser Register(AddUserRequest request, Organization organization)
         {
 
@@ -102,6 +122,12 @@ namespace AMS.Managers.Auth
                 user.Schedule = CheckSchedule(request.ScheduleId, authManager.GetUserOrganizationId());
             }
 
+            if (request.GroupIds != null)
+            {
+
+                CheckGroupScheduleId(user, request.GroupIds);
+            }
+
             dbContext.Users.Add(user);
             dbContext.SaveChanges();
 
@@ -122,7 +148,7 @@ namespace AMS.Managers.Auth
 
         public ApplicationUser UpdateUser(UpdateUserRequest request, string id)
         {
-            var user = dbContext.Users.Include(u => u.Roles).FirstOrDefault(u => u.Id == id) ?? throw new Exception("User not found.");
+            var user = dbContext.Users.Include(u => u.Roles).Include(u => u.Groups).FirstOrDefault(u => u.Id == id) ?? throw new Exception("User not found.");
 
             if (request.FirstName != null) user.FirstName = request.FirstName;
 
@@ -159,6 +185,10 @@ namespace AMS.Managers.Auth
 
             if (request.ScheduleId != null) user.Schedule = CheckSchedule(request.ScheduleId, authManager.GetUserOrganizationId());
 
+            if (request.GroupIds != null)
+            {
+                CheckGroupScheduleId(user, request.GroupIds);
+            }
 
             dbContext.SaveChanges();
 

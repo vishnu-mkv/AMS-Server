@@ -1,6 +1,7 @@
 ﻿using System.Text.Json.Serialization;
 using AMS.Enums;
 using AMS.Models;
+using AMS.Utils;
 
 namespace AMS.Responses
 {
@@ -24,6 +25,8 @@ namespace AMS.Responses
         // sign in allowed
         public bool SignInAllowed { get; set; } = false;
 
+        [JsonConverter(typeof(PhotoUrlConverter))]
+
         public string Picture { get; set; } = string.Empty;
 
         // disabled
@@ -35,5 +38,9 @@ namespace AMS.Responses
         public GroupSummaryResponse[] Groups { get; set; } = Array.Empty<GroupSummaryResponse>();
 
         public string? ScheduleId { get; set; }
+
+        public ScheduleResponse? Schedule { get; set; }
+
+        public string? UserName { get; set; }
     }
 }

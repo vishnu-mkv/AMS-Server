@@ -1,5 +1,4 @@
 using AMS.Enums;
-using System.ComponentModel.DataAnnotations;
 
 namespace AMS.Requests
 {
@@ -17,6 +16,7 @@ namespace AMS.Requests
 
         public bool? Disabled { get; set; }
         public string? ScheduleId { get; set; }
+        public string[]? GroupIds { get; set; }
     }
 
 }

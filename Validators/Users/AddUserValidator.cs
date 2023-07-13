@@ -6,7 +6,7 @@ namespace AMS.Validators
 {
     public class UserValidator : AbstractValidator<AddUserRequest>
     {
-        public UserValidator(IRoleProvider rolePermissionProvider, IUserManager userManager, IScheduleManager scheduleManager, IAuthManager authManager)
+        public UserValidator(IRoleProvider rolePermissionProvider, IUserManager userManager, IScheduleManager scheduleManager, IAuthManager authManager, IGroupManager groupManager)
         {
             int max = 20;
             RuleFor(x => x.FirstName).NotEmpty().Length(2, max).WithMessage("First name is required.");
@@ -30,6 +30,9 @@ namespace AMS.Validators
 
             RuleFor(x => x.ScheduleId)
                 .SetValidator(new ScheduleIdValidator<AddUserRequest>(scheduleManager, authManager));
+
+            RuleFor(x => x.GroupIds)
+                .SetValidator(new GroupsValidator<AddUserRequest>(authManager, groupManager));
         }
     }
 }

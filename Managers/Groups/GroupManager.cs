@@ -19,12 +19,12 @@ public class GroupManager : IGroupManager
         this.authManager = authManager;
     }
 
-    public bool CheckIfAllGroupsHaveSameSchedule(string scheduleId, string[] groupId)
+    public bool CheckIfAllGroupsHaveSameSchedule(string? scheduleId, string[] groupId)
     {
         // check if any of the groups does not have the same schedule id
         // if group schedule id is null, it means that it has the same schedule 
         // true if all groups have the same schedule id
-        return !context.Groups.Any(w => groupId.Contains(w.Id) && w.ScheduleId != scheduleId && w.ScheduleId != null);
+        return !context.Groups.Any(w => groupId.Contains(w.Id) && ((w.ScheduleId != scheduleId && w.ScheduleId != null) || (w.ScheduleId != null && scheduleId == null)));
     }
 
     // given a list of users, if user schedule id is null, it means that it has the same schedule
@@ -71,11 +71,12 @@ public class GroupManager : IGroupManager
         }
     }
 
-    public bool CheckIfAllUsersHaveSameSchedule(string scheduleId, string[] userId)
+    public bool CheckIfAllUsersHaveSameSchedule(string? scheduleId, string[] userId)
     {
         // check if any of the users does not have the same schedule id
+        // if schedule id is null, then user should have null schedule id
         // if user schedule id is null, it means that it has the same schedule
-        return !context.Users.Any(w => userId.Contains(w.Id) && w.ScheduleId != scheduleId && w.ScheduleId != null);
+        return !context.Users.Any(w => userId.Contains(w.Id) && ((w.ScheduleId != scheduleId && w.ScheduleId != null) || (w.ScheduleId != null && scheduleId == null)));
     }
 
     public bool CheckGroupExists(string groupId)
@@ -233,67 +234,53 @@ public class GroupManager : IGroupManager
             group.Disabled = (bool)request.Disabled;
         }
 
+        if (request.ScheduleId != null && group.ScheduleId == null)
+        {
+            group.ScheduleId = request.ScheduleId;
+        }
+
 
         if (group.GroupType == GroupType.GroupOfUsers)
         {
-            List<ApplicationUser> users = group.Users.ToList();
 
-            if (request.Users_to_add != null)
+            if (request.Users != null)
             {
-                if (group.ScheduleId == null)
-                {
-                    throw new InvalidOperationException("Group must have a schedule");
-                }
 
-                if (!CheckIfAllUsersHaveSameSchedule(group.ScheduleId, request.Users_to_add))
+                if (CheckIfAllUsersHaveSameSchedule(group.ScheduleId, request.Users) == false)
                 {
                     throw new InvalidOperationException("Users must have the same schedule");
                 }
+                group.Users = context.Users.Where(w => request.Users.Contains(w.Id)).Distinct().ToList();
 
-                users.AddRange(context.Users.Where(w => request.Users_to_add.Contains(w.Id)));
-                // remove duplicates and remove Users_to_remove
-                users = users.Distinct().ToList();
+                if (group.ScheduleId != null)
+                {
+                    PopulateScheduleId(group.Users, group.ScheduleId);
+                }
             }
-
-            if (request.Users_to_remove != null)
-            {
-                users.RemoveAll(w => request.Users_to_remove.Contains(w.Id));
-            }
-
-            group.Users = users;
-            PopulateScheduleId(group.Users, group.ScheduleId);
         }
 
         if (group.GroupType == GroupType.GroupOfGroups)
         {
 
-            List<Group> groups = group.Groups.ToList();
 
-            if (request.Groups_to_add != null)
+
+            if (request.Groups != null)
             {
-                if (group.ScheduleId == null)
-                {
-                    throw new InvalidOperationException("Group must have a schedule");
-                }
 
-                if (!CheckIfAllGroupsHaveSameSchedule(group.ScheduleId, request.Groups_to_add))
+
+                if (CheckIfAllGroupsHaveSameSchedule(group.ScheduleId, request.Groups) == false)
                 {
                     throw new InvalidOperationException("Groups must have the same schedule");
                 }
 
-                groups.AddRange(context.Groups.Where(w => request.Groups_to_add.Contains(w.Id)));
-                // remove duplicates and remove Groups_to_remove
-                groups = groups.Distinct().ToList();
+                group.Groups = context.Groups.Where(w => request.Groups.Contains(w.Id)).ToList();
+
+                if (group.ScheduleId != null)
+                {
+
+                    PopulateScheduleId(group.Groups, group.ScheduleId);
+                }
             }
-
-            if (request.Groups_to_remove != null)
-            {
-                groups.RemoveAll(w => request.Groups_to_remove.Contains(w.Id));
-            }
-
-
-            group.Groups = groups;
-            PopulateScheduleId(group.Groups, group.ScheduleId);
         }
 
         context.SaveChanges();
