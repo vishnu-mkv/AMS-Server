@@ -110,4 +110,25 @@ public class ScheduleManager : IScheduleManager
     {
         return CheckIfScheduleExists(id, _authManager.GetUserOrganizationId());
     }
+
+    // my schedule 
+    // get user from auth manager
+    // get the schedule from the user
+    // get the sessions that has groups that has the user
+    public Schedule? GetMySchedule()
+    {
+        var user = _authManager.GetCurrentUser() ?? throw new Exception("User not found.");
+
+        var scheduleId = user.ScheduleId ?? throw new Exception("User does not have a schedule.");
+
+        var schedule = GetSchedule(scheduleId, true) ?? throw new Exception("Schedule not found.");
+
+        // get user groups
+        var userGroups = _context.Groups.Where(g => g.Users.Any(u => u.Id == user.Id)).ToList();
+
+        // filter sessions that has groups that has the user
+        schedule.Sessions = schedule.Sessions.Where(s => s.Groups.Any(g => userGroups.Any(ug => ug.Id == g.Id))).ToList();
+
+        return schedule;
+    }
 }

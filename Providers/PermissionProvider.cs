@@ -46,7 +46,8 @@ public enum PermissionEnum
     UpdateAttendance,
     ReadAttendance,
     DeleteAttendance,
-    ListAttendanceStatuses
+    ListAttendanceStatuses,
+    GetGroupReport
 
     // Define other permissions here
 }
@@ -106,7 +107,8 @@ public static class PermissionRepo
         { PermissionEnum.UpdateAttendance, new AppPermission("Update Attendance", "Update an existing attendance") },
         { PermissionEnum.ReadAttendance, new AppPermission("Read Attendance", "Read an attendance") },
         { PermissionEnum.DeleteAttendance, new AppPermission("Delete Attendance", "Delete an attendance") },
-        { PermissionEnum.ListAttendanceStatuses, new AppPermission("List Attendance Statuses", "List all attendance statuses") }
+        { PermissionEnum.ListAttendanceStatuses, new AppPermission("List Attendance Statuses", "List all attendance statuses") },
+        { PermissionEnum.GetGroupReport, new AppPermission("Get Group Report", "Get group report") }
 
     };
 }

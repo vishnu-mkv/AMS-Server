@@ -53,9 +53,9 @@ public class GroupManager : IGroupManager
             {
                 group.ScheduleId = scheduleId;
             }
-            else
+            else if (group.ScheduleId != scheduleId)
             {
-                throw new Exception("Group already has a schedule");
+                throw new Exception("Group is already assigned to a different schedule");
             }
 
             var _group = context.Groups.Where(w => w.Id == group.Id).Include(i => i.Users).Include(i => i.Groups).FirstOrDefault();
@@ -118,6 +118,7 @@ public class GroupManager : IGroupManager
                     }
                     group.Users = context.Users.Where(w => request.Users.Contains(w.Id)).Distinct().ToList();
                     PopulateScheduleId(group.Users, request.ScheduleId);
+                    PropagateUsersUp(group);
                 }
             }
             else if (request.GroupType == GroupType.GroupOfGroups)
@@ -132,6 +133,9 @@ public class GroupManager : IGroupManager
                     }
                     group.Groups = context.Groups.Where(w => request.Groups.Contains(w.Id)).ToList();
                     PopulateScheduleId(group.Groups, request.ScheduleId);
+
+                    UpdateUsersOfGroup(group);
+                    PropagateUsersUp(group);
                 }
             }
         }
@@ -144,7 +148,7 @@ public class GroupManager : IGroupManager
 
     public Group GetGroup(string groupId)
     {
-        Group? group = context.Groups.Include(g => g.Users).Include(g => g.Groups).FirstOrDefault(w => w.Id == groupId);
+        Group? group = context.Groups.Include(g => g.Users).Include(g => g.Groups).Include(g => g.Schedule).FirstOrDefault(w => w.Id == groupId);
 
         if (group is null || group.OrganizationId != authManager.GetUserOrganizationId())
         {
@@ -246,39 +250,47 @@ public class GroupManager : IGroupManager
             if (request.Users != null)
             {
 
-                if (CheckIfAllUsersHaveSameSchedule(group.ScheduleId, request.Users) == false)
+                // check if no changes were made
+                if (!group.Users.Select(s => s.Id).OrderBy(o => o).SequenceEqual(request.Users.OrderBy(o => o)))
                 {
-                    throw new InvalidOperationException("Users must have the same schedule");
-                }
-                group.Users = context.Users.Where(w => request.Users.Contains(w.Id)).Distinct().ToList();
+                    if (CheckIfAllUsersHaveSameSchedule(group.ScheduleId, request.Users) == false)
+                    {
+                        throw new InvalidOperationException("Users must have the same schedule");
+                    }
+                    group.Users = context.Users.Where(w => request.Users.Contains(w.Id)).Distinct().ToList();
 
-                if (group.ScheduleId != null)
-                {
-                    PopulateScheduleId(group.Users, group.ScheduleId);
+                    if (group.ScheduleId != null)
+                    {
+                        PopulateScheduleId(group.Users, group.ScheduleId);
+                    }
+
+                    PropagateUsersUp(group);
                 }
             }
         }
 
         if (group.GroupType == GroupType.GroupOfGroups)
         {
-
-
-
             if (request.Groups != null)
             {
-
-
-                if (CheckIfAllGroupsHaveSameSchedule(group.ScheduleId, request.Groups) == false)
-                {
-                    throw new InvalidOperationException("Groups must have the same schedule");
-                }
-
-                group.Groups = context.Groups.Where(w => request.Groups.Contains(w.Id)).ToList();
-
-                if (group.ScheduleId != null)
+                // check if no changes were made
+                if (!group.Groups.Select(s => s.Id).OrderBy(o => o).SequenceEqual(request.Groups.OrderBy(o => o)))
                 {
 
-                    PopulateScheduleId(group.Groups, group.ScheduleId);
+                    if (CheckIfAllGroupsHaveSameSchedule(group.ScheduleId, request.Groups) == false)
+                    {
+                        throw new InvalidOperationException("Groups must have the same schedule");
+                    }
+
+                    group.Groups = context.Groups.Where(w => request.Groups.Contains(w.Id)).ToList();
+
+                    if (group.ScheduleId != null)
+                    {
+                        PopulateScheduleId(group.Groups, group.ScheduleId);
+                    }
+
+                    UpdateUsersOfGroup(group);
+                    PropagateUsersUp(group);
                 }
             }
         }
@@ -287,4 +299,56 @@ public class GroupManager : IGroupManager
 
         return group;
     }
+
+    // method to update indirect users of a group
+    // when  a group is updated, find group of groups that contain the group and update the users of those groups
+    // add the users of the group to the group's users and call distinct
+    // then find that group's parent group of groups and repeat the process
+    // this is done recursively until there are no more parent group of groups
+    public void PropagateUsersUp(Group group, int maxDepth = 10)
+    {
+        if (maxDepth == 0)
+        {
+            throw new InvalidOperationException("Max depth reached");
+        }
+
+        List<Group>? groupOfGroups = context.Groups.Include(g => g.Users).Include(g => g.Groups)
+        .Where(g => g.GroupType == GroupType.GroupOfGroups)
+        .Where(w => w.Groups.Any(a => a.Id == group.Id)).ToList();
+
+        if (groupOfGroups.Count > 0)
+        {
+            foreach (Group groupOfGroup in groupOfGroups)
+            {
+                groupOfGroup.Users = groupOfGroup.Users.Concat(group.Users).Distinct().ToList();
+                PropagateUsersUp(groupOfGroup, maxDepth - 1);
+            }
+        }
+    }
+
+    // given a group, get all users of the child groups
+    // set the users of the group to the users of the child groups
+    // call distinct to remove duplicates
+    public void UpdateUsersOfGroup(Group group)
+    {
+        var childGroupIds = group.Groups.Select(s => s.Id).ToList();
+
+        List<Group>? groups = context.Groups.Include(g => g.Users)
+        .Where(w =>
+            childGroupIds.Contains(w.Id)
+        ).ToList();
+
+        if (groups.Count > 0)
+        {
+            List<ApplicationUser> users = new();
+
+            foreach (Group groupOfGroup in groups)
+            {
+                users = users.Concat(groupOfGroup.Users).ToList();
+            }
+
+            group.Users = users.Distinct().ToList();
+        }
+    }
+
 }

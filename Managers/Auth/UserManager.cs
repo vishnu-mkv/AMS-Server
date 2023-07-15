@@ -87,7 +87,7 @@ namespace AMS.Managers.Auth
             if (schedules.Count > 1) throw new Exception("User can not be in groups with different schedules.");
 
 
-            if (user.ScheduleId != null && schedules[0] != user.ScheduleId) throw new Exception("User schedule does not match the group schedules.");
+            if (user.ScheduleId != null && schedules.Count > 0 && schedules[0] != user.ScheduleId) throw new Exception("User schedule does not match the group schedules.");
 
             if (user.Schedule == null) user.ScheduleId = schedules[0];
 
@@ -203,7 +203,7 @@ namespace AMS.Managers.Auth
         {
             var organization = authManager.GetUserOrganization();
 
-            IQueryable<ApplicationUser> query = dbContext.Users.Include(u => u.Organization).Include(u => u.Roles);
+            IQueryable<ApplicationUser> query = dbContext.Users.Include(u => u.Organization).Include(u => u.Roles).Include(u => u.Schedule);
 
             // Filter by ID
             query = query.Where(user => user.OrganizationId == organization.Id);
@@ -212,6 +212,15 @@ namespace AMS.Managers.Auth
             if (paginationQuery.Roles.Length > 0)
             {
                 query = query.Where(user => user.Roles.Any(role => paginationQuery.Roles.Contains(role.Id)));
+            }
+
+            Console.WriteLine("here2 " + paginationQuery.ScheduleId);
+
+            if (paginationQuery.ScheduleId != null)
+            {
+                var includeNoSchedule = paginationQuery.ScheduleId.Contains("null");
+                Console.WriteLine("here " + String.Join(",", paginationQuery.ScheduleId));
+                query = query.Where(user => paginationQuery.ScheduleId.Contains(user.ScheduleId) || (includeNoSchedule && user.ScheduleId == null));
             }
 
 

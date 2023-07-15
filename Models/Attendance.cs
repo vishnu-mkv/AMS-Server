@@ -17,6 +17,10 @@ public class Attendance
 
     public Session? Session { get; set; }
 
+    public string? TopicId { get; set; }
+
+    public Topic? Topic { get; set; }
+
     public string? GroupId { get; set; }
 
     public Group? Group { get; set; }

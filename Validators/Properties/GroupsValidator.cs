@@ -28,7 +28,7 @@ class GroupsValidator<T> : PropertyValidator<T, string[]>
         {
             return true;
         }
-
+        value = value.Where(u => !string.IsNullOrEmpty(u)).ToArray();
         string organizationId = authManager.GetUserOrganization().Id;
         return value.All(u => GroupManager.GroupExists(organizationId, u));
 

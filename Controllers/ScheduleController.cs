@@ -182,5 +182,12 @@ public class ScheduleController : ControllerBase
         return Ok(mapper.Map<SessionDetailResponse>(sessionManager.GetSession(sessionId, true)));
     }
 
+    [HttpGet]
+    [Route("myschedule")]
+    public IActionResult GetMySchedule()
+    {
+        return Ok(mapper.Map<ScheduleDetailResponse>(scheduleManager.GetMySchedule()));
+    }
+
 
 }

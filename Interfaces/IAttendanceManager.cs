@@ -1,6 +1,7 @@
 using AMS.DTO;
 using AMS.Models;
 using AMS.Requests;
+using AMS.Responses;
 
 namespace AMS.Interfaces;
 
@@ -19,4 +20,8 @@ public interface IAttendanceManager
 
     public PaginationDTO<Attendance> ListAttendances(AttendancePaginationQuery paginationQuery);
     void DeleteAttendance(string attendanceId);
+
+    public GroupReportView GetGroupReport(AttendanceReportRequest request);
+
+
 }

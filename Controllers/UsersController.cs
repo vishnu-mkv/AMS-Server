@@ -60,25 +60,10 @@ namespace AMS.Controllers
         [Route("")]
         [HasPermission(PermissionEnum.ListUsers)]
         public ActionResult<List<UserSummaryResponse>> ListUsers(
-            [FromQuery] int page = 1,
-            [FromQuery] int limit = 10,
-            [FromQuery] string search = "",
-            [FromQuery] string sort = "created_at",
-            [FromQuery] string order = "desc",
-            [FromQuery] string[]? roles = null
-        )
+            [FromQuery] UserPaginationQuery paginationQuery)
+
         {
             // pagination query
-            var paginationQuery = new UserPaginationQuery
-            {
-                Page = page,
-                Limit = limit,
-                Search = search,
-                SortBy = sort,
-                Order = order,
-                Roles = roles ?? Array.Empty<string>()
-            };
-
             var users = _userManager.ListUsers(paginationQuery);
 
             return Ok(_mapper.Map<PaginationDTO<UserSummaryResponse>>(users));
@@ -91,7 +76,6 @@ namespace AMS.Controllers
         [HasPermission(PermissionEnum.UpdateUser)]
         public ActionResult<UserResponse> UpdateUser([FromForm] UpdateUserRequest request, [FromRoute] string id)
         {
-            Console.WriteLine("here" + request.GroupIds[0]);
             var result = _updateUserValidator.Validate(request);
 
             if (!result.IsValid)

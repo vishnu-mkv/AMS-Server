@@ -12,5 +12,7 @@ public interface IScheduleManager
     Schedule? GetSchedule(string id, bool populate = false);
     List<Schedule> GetSchedules();
     Schedule? UpdateSchedule(string id, UpdateScheduleRequest updateScheduleRequest);
+    public Schedule? GetMySchedule();
+
 
 }

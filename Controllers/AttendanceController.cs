@@ -52,6 +52,14 @@ public class AttendanceController : ControllerBase
         return Ok(_mapper.Map<PaginationDTO<AttendanceResponseWithoutRecords>>(attendances));
     }
 
+    [HttpGet("group-report")]
+    [HasPermission(PermissionEnum.GetGroupReport)]
+    public IActionResult GetGroupReport([FromQuery] AttendanceReportRequest request)
+    {
+        var groupReport = _attendanceManager.GetGroupReport(request);
+        return Ok(groupReport);
+    }
+
     [HttpPost]
     [HasPermission(PermissionEnum.AddAttendance)]
     public IActionResult AddAttendance([FromBody] AddAttendanceRequest request)

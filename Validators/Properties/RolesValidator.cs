@@ -29,6 +29,7 @@ public class RolesValidator<T> : PropertyValidator<T, string[]>
             return true;
         }
 
+        value = value.Where(u => !string.IsNullOrEmpty(u)).ToArray();
 
         return rolePermissionProvider.CheckRolesExists(value.ToArray()) &&
                rolePermissionProvider.GetRolesByIds(value).TrueForAll(r =>

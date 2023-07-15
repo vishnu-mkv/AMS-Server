@@ -14,6 +14,7 @@ public class GroupSummaryResponse
 
 public class GroupResponse : GroupSummaryResponse
 {
+    public ScheduleResponse? Schedule { get; set; }
     public List<UserBaseSummaryResponse> Users { get; set; } = null!;
     public List<GroupSummaryResponse> Groups { get; set; } = null!;
 

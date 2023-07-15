@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using AMS.Models;
 
 namespace AMS.DTO;
@@ -45,6 +46,7 @@ public class PaginationQuery
 public class UserPaginationQuery : PaginationQuery
 {
     public string[] Roles { get; set; } = Array.Empty<string>();
+    public string[]? ScheduleId { get; set; } = null;
 }
 
 public class GroupPaginationQuery : PaginationQuery
@@ -76,3 +78,4 @@ public class AttendancePaginationQuery : PaginationQuery
     public DateTime? EndDate { get; set; } = null;
     public string[]? TopicId { get; set; } = null;
 }
+
