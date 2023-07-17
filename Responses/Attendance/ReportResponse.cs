@@ -4,7 +4,7 @@ namespace AMS.Responses;
 
 public class GroupReportView
 {
-    public GroupSummaryResponse Group { get; set; } = new();
+    public GroupResponse Group { get; set; } = new();
 
     public List<DayReportView> DayReports { get; set; } = new();
 
@@ -31,4 +31,16 @@ public class AttendanceStatusCount
 
     public string AttendanceStatusId { get; set; }
     public int? Count { get; set; } = null;
+}
+
+public class UserGroupReportView : GroupReportView
+{
+    public List<UserReportView> UserReports { get; set; } = new();
+}
+
+public class UserReportView
+{
+    public UserSummaryResponse User { get; set; } = new();
+
+    public List<DayReportView> DayReports { get; set; } = new();
 }

@@ -11,7 +11,7 @@ public class Attendance
 
     public DateTime RecordedFor { get; set; }
 
-    public DateTime? Created { get; } = DateTime.Now;
+    public DateTime? Created { get; set; } = DateTime.Now;
 
     public string SessionId { get; set; }
 
@@ -30,6 +30,9 @@ public class Attendance
     public Slot? Slot { get; set; }
 
     public ICollection<Record> Records { get; set; } = new List<Record>();
+
+    public Organization? Organization { get; set; }
+    public string? OrganizationId { get; set; } = "default";
 
     public Attendance()
     {

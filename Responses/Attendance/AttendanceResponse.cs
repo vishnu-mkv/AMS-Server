@@ -11,7 +11,7 @@ public class AttendanceResponse
 
     public DateTime? Created { get; } = DateTime.Now;
 
-    public SessionSummaryResponse Session { get; set; }
+    public TopicResponse Topic { get; set; }
 
     public GroupSummaryResponse Group { get; set; }
 
@@ -28,9 +28,9 @@ public class AttendanceSummaryResponse
 
     public DateTime RecordedFor { get; set; }
 
-    public DateTime? Created { get; } = DateTime.Now;
+    public DateTime? Created { get; set; }
 
-    public string SessionId { get; set; }
+    public string TopicId { get; set; }
 
     public GroupSummaryResponse Group { get; set; }
 
@@ -45,11 +45,12 @@ public class AttendanceResponseWithoutRecords
 
     public DateTime RecordedFor { get; set; }
 
-    public DateTime? Created { get; } = DateTime.Now;
+    public DateTime? Created { get; set; }
 
-    public SessionSummaryResponse Session { get; set; }
+    public TopicResponse Topic { get; set; }
 
     public GroupSummaryResponse Group { get; set; }
 
     public SlotResponse Slot { get; set; }
+
 }

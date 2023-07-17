@@ -89,7 +89,7 @@ namespace AMS.Managers.Auth
 
             if (user.ScheduleId != null && schedules.Count > 0 && schedules[0] != user.ScheduleId) throw new Exception("User schedule does not match the group schedules.");
 
-            if (user.Schedule == null) user.ScheduleId = schedules[0];
+            if (user.Schedule == null && schedules.Count > 0) user.ScheduleId = schedules[0];
 
             user.Groups = groups;
         }

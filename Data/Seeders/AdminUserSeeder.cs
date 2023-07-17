@@ -20,17 +20,24 @@ namespace AMS.Data.Seeders
             using var scope = _services.CreateScope();
             var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
-            context.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
+            var OrganizationName = "KEC";
+            var OrganizationId = OrganizationName.ToLower();
 
             // check if default organization exists
             var OrganizationProvider = scope.ServiceProvider.GetService<IOrganizationProvider>();
 
-            var organization = OrganizationProvider.GetOrganizationById("default");
-
+            Console.WriteLine("Organizations found: " + context.Organizations.Count());
+            var organization = context.Organizations.FirstOrDefault(organization => organization.Name == OrganizationName);
             // create default organization if it does not exist
             if (organization == null)
             {
-                organization = OrganizationProvider.CreateOrganization("Default");
+                organization = new Organization()
+                {
+                    Id = OrganizationId,
+                    Name = OrganizationName,
+                };
+                context.Organizations.Add(organization);
+                context.SaveChanges();
             }
 
             // check if admin access permission exists
@@ -38,27 +45,39 @@ namespace AMS.Data.Seeders
 
             var permission = context.Permissions.FirstOrDefault(permission => permission.Id == AdminPermission.Id) ?? throw new Exception("Admin Access permission does not exist");
 
+            var roleId = OrganizationId + "-" + "administrator";
             // check if admin role exists
-            Role AdminRole = new("Administrator");
+            var role = context.Roles.Include(x => x.Permissions).Where(x => x.OrganizationId == OrganizationId).FirstOrDefault(role => role.Id == roleId);
 
-            // get IRolesProvider
-            var RolesProvider = scope.ServiceProvider.GetService<IRoleProvider>();
-
-            Role role = RolesProvider.GetRolesByIds(new string[] { AdminRole.Id }).FirstOrDefault();
-
-            if (role == null || role.Organization.Id != organization.Id)
+            if (role == null)
             {
-                role = await RolesProvider.CreateRole("Administrator", "Administrator role", new List<Permission> { AdminPermission }, organization);
+                role = new Role()
+                {
+                    Id = roleId,
+                    Name = "Administrator",
+                    Permissions = new List<Permission>()
+                    {
+                        permission
+                    },
+                    Description = "Administrator role",
+                    Organization = organization
+                };
+                context.Roles.Add(role);
+                context.SaveChanges();
             }
 
-            // check if admin user exists
+            Console.WriteLine("Admin role found: " + role.Name);
 
             // get IUsersProvider
             var userManager = scope.ServiceProvider.GetService<IUserManager>();
 
-            var user = context.Users.Include(u => u.Organization).FirstOrDefault(x => x.Roles.Any(y => y.Id == role.Id));
+            var user = context.Users.Include(u => u.Organization).Where(x => x.OrganizationId == OrganizationId).FirstOrDefault(x => x.Roles.Any(y => y.Id == role.Id));
 
-            if (user != null && user.Organization.Id == organization.Id) return;
+            if (user != null && user.Organization.Id == organization.Id)
+            {
+                Console.WriteLine("User Found: " + user.FirstName);
+                return;
+            }
 
             Console.WriteLine("Please provide the following information:");
 
@@ -74,18 +93,23 @@ namespace AMS.Data.Seeders
             Console.Write("Password: ");
             string password = Console.ReadLine();
 
-            AddUserRequest newUser = new()
+            var passwordHasher = scope.ServiceProvider.GetService<ISecurePasswordHasher>();
+
+            var NewUser = new ApplicationUser()
             {
                 FirstName = firstName,
                 LastName = lastName,
-                RoleIds = new[] { role.Id },
-                Id = "1",
-                Password = password,
+                Password = passwordHasher.Hash(password),
+                Roles = new List<Role>{
+                    role
+                },
+                OrganizationId = organization.Id,
                 SignInAllowed = true,
-                UserName = username
+                UserName = username,
             };
 
-            userManager.Register(newUser, organization);
+            context.Users.Add(NewUser);
+            context.SaveChanges();
 
             Console.WriteLine("Admin user created successfully!");
         }

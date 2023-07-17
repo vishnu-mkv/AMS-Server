@@ -9,7 +9,6 @@ public class UpdateGroupValidaor : AbstractValidator<UpdateGroupRequest>
     public UpdateGroupValidaor(IUserManager userManager, IAuthManager authManager, IGroupManager groupManager, IScheduleManager scheduleManager)
     {
 
-        RuleFor(x => x.Name).MinimumLength(3).WithMessage("Name must be at least 3 characters");
 
         RuleFor(x => x.Users).SetValidator(
             new UsersValidator<UpdateGroupRequest>(authManager, userManager)

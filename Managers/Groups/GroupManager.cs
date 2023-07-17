@@ -103,42 +103,40 @@ public class GroupManager : IGroupManager
         if (request.Color != null)
             group.Color = request.Color;
 
-        if (request.ScheduleId != null)
+
+        if (request.GroupType == GroupType.GroupOfUsers)
         {
+            group.GroupType = GroupType.GroupOfUsers;
 
-            if (request.GroupType == GroupType.GroupOfUsers)
+            if (request.Users != null)
             {
-                group.GroupType = GroupType.GroupOfUsers;
-
-                if (request.Users != null)
+                if (!CheckIfAllUsersHaveSameSchedule(request.ScheduleId, request.Users))
                 {
-                    if (!CheckIfAllUsersHaveSameSchedule(request.ScheduleId, request.Users))
-                    {
-                        throw new InvalidOperationException("Users must have the same schedule");
-                    }
-                    group.Users = context.Users.Where(w => request.Users.Contains(w.Id)).Distinct().ToList();
-                    PopulateScheduleId(group.Users, request.ScheduleId);
-                    PropagateUsersUp(group);
+                    throw new InvalidOperationException("Users must have the same schedule");
                 }
-            }
-            else if (request.GroupType == GroupType.GroupOfGroups)
-            {
-                group.GroupType = GroupType.GroupOfGroups;
-
-                if (request.Groups != null)
-                {
-                    if (!CheckIfAllGroupsHaveSameSchedule(request.ScheduleId, request.Groups))
-                    {
-                        throw new InvalidOperationException("Groups must have the same schedule");
-                    }
-                    group.Groups = context.Groups.Where(w => request.Groups.Contains(w.Id)).ToList();
-                    PopulateScheduleId(group.Groups, request.ScheduleId);
-
-                    UpdateUsersOfGroup(group);
-                    PropagateUsersUp(group);
-                }
+                group.Users = context.Users.Where(w => request.Users.Contains(w.Id)).Distinct().ToList();
+                PopulateScheduleId(group.Users, request.ScheduleId);
+                PropagateUsersUp(group);
             }
         }
+        else if (request.GroupType == GroupType.GroupOfGroups)
+        {
+            group.GroupType = GroupType.GroupOfGroups;
+
+            if (request.Groups != null)
+            {
+                if (!CheckIfAllGroupsHaveSameSchedule(request.ScheduleId, request.Groups))
+                {
+                    throw new InvalidOperationException("Groups must have the same schedule");
+                }
+                group.Groups = context.Groups.Where(w => request.Groups.Contains(w.Id)).ToList();
+                PopulateScheduleId(group.Groups, request.ScheduleId);
+
+                UpdateUsersOfGroup(group);
+                PropagateUsersUp(group);
+            }
+        }
+
 
         context.Groups.Add(group);
         context.SaveChanges();

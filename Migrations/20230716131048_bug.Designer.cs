@@ -4,6 +4,7 @@ using AMS.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AMS.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230716131048_bug")]
+    partial class bug
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -86,9 +89,6 @@ namespace AMS.Migrations
                     b.Property<string>("GroupId")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("OrganizationId")
-                        .HasColumnType("nvarchar(450)");
-
                     b.Property<DateTime>("RecordedFor")
                         .HasColumnType("datetime2");
 
@@ -108,8 +108,6 @@ namespace AMS.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("GroupId");
-
-                    b.HasIndex("OrganizationId");
 
                     b.HasIndex("ScheduleId");
 
@@ -514,10 +512,6 @@ namespace AMS.Migrations
                         .WithMany()
                         .HasForeignKey("GroupId");
 
-                    b.HasOne("AMS.Models.Organization", "Organization")
-                        .WithMany()
-                        .HasForeignKey("OrganizationId");
-
                     b.HasOne("AMS.Models.Schedule", "Schedule")
                         .WithMany()
                         .HasForeignKey("ScheduleId");
@@ -537,8 +531,6 @@ namespace AMS.Migrations
                         .HasForeignKey("TopicId");
 
                     b.Navigation("Group");
-
-                    b.Navigation("Organization");
 
                     b.Navigation("Schedule");
 

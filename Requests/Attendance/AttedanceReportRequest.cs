@@ -17,5 +17,6 @@ public class AttendanceReportRequest
 
     public DayOfWeek[]? Days { get; set; } = null;
     public string[]? AttendanceStatusIds { get; set; } = null;
+    public bool? isUserReport { get; set; } = false;
 
 }

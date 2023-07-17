@@ -44,15 +44,15 @@ public class AttendanceStatusSeeder
         context.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
 
         // check if default organization exists
-        var OrganizationProvider = scope.ServiceProvider.GetService<IOrganizationProvider>();
+        var Organizationname = "KEC";
 
-        var organization = OrganizationProvider.GetOrganizationById("default");
+        var organization = context.Organizations.FirstOrDefault(organization => organization.Name == Organizationname);
 
         if (organization == null) throw new Exception("Default Organization does not exist");
 
         // check if attendance status exists using db context
         var attendanceIds = _attendanceStatusList.Select(a => a.Id).ToList();
-        var attendanceStatuses = context.AttendanceStatuses.Where(a => a.OrganizationId == organization.Id && attendanceIds.Contains(a.Id)).ToList();
+        var attendanceStatuses = context.AttendanceStatuses.Where(a => attendanceIds.Contains(a.Id)).ToList();
 
         var notPresentAttendanceStatuses = attendanceIds.Except(attendanceStatuses.Select(a => a.Id)).ToList();
 

@@ -54,14 +54,14 @@ public class AttendanceManager : IAttendanceManager
             SlotId = Slot.Id,
             SessionId = request.SessionId,
             RecordedFor = request.Date,
-            TopicId = session.TopicId,
+            TopicId = session?.TopicId,
             Records = request.AttendanceEntries.Select(x => new Record
             {
                 AttendanceId = Id,
                 UserId = x.UserId,
                 AttendanceStatusId = x.AttendanceStatusId
-            }).ToList()
-
+            }).ToList(),
+            OrganizationId = authManager.GetUserOrganizationId()
         };
 
         context.Attendances.Add(attendance);
@@ -72,7 +72,7 @@ public class AttendanceManager : IAttendanceManager
 
     public bool AttendanceExists(string attendanceId)
     {
-        return context.Attendances.Any(x => x.Id == attendanceId);
+        return context.Attendances.Any(x => x.Id == attendanceId && x.OrganizationId == authManager.GetUserOrganizationId());
     }
 
     public bool CheckIfUserHasPermission(string[] GroupAccessPath, string targetGroupId, string sessionId)
@@ -141,14 +141,14 @@ public class AttendanceManager : IAttendanceManager
     {
         if (populate)
         {
-            return context.Attendances.Include(a => a.Group).Include(a => a.Session).ThenInclude(s => s.Topic)
+            return context.Attendances.Include(a => a.Group).Include(s => s.Topic)
                 .Include(a => a.Schedule).Include(a => a.Slot).ThenInclude(s => s.TimeSlot)
                 .Include(a => a.Records).ThenInclude(r => r.User)
-                .FirstOrDefault(x => x.Id == attendanceId);
+                .FirstOrDefault(x => x.Id == attendanceId && x.OrganizationId == authManager.GetUserOrganizationId());
         }
         else
         {
-            return context.Attendances.FirstOrDefault(x => x.Id == attendanceId);
+            return context.Attendances.FirstOrDefault(x => x.Id == attendanceId && x.OrganizationId == authManager.GetUserOrganizationId());
         }
     }
 
@@ -156,7 +156,9 @@ public class AttendanceManager : IAttendanceManager
     {
         var query = context.Attendances.Include(x => x.Group)
             .Include(x => x.Topic).Include(x => x.Slot).ThenInclude(x => x.TimeSlot)
-            .Include(x => x.Schedule).AsQueryable();
+            .Include(x => x.Schedule)
+            .Where(x => x.OrganizationId == authManager.GetUserOrganizationId())
+            .AsQueryable();
 
         if (paginationQuery.TopicId != null)
         {
@@ -248,12 +250,25 @@ public class AttendanceManager : IAttendanceManager
         return attendance;
     }
 
-
     public GroupReportView GetGroupReport(AttendanceReportRequest request)
     {
         string groupId = request.GroupId;
 
-        var group = context.Groups.Include(x => x.Users).FirstOrDefault(x => x.Id == groupId) ?? throw new KeyNotFoundException();
+        var group = context.Groups.Include(x => x.Users).Include(x => x.Groups).FirstOrDefault(x => x.Id == groupId
+            && x.OrganizationId == authManager.GetUserOrganizationId()
+        ) ?? throw new Exception("Group not found");
+
+        if (request.isUserReport == true)
+        {
+            return GetGroupOfUsersReport(group, request);
+        }
+
+        return GetGroupOfGroupsReport(group, request);
+    }
+
+
+    public GroupReportView GetGroupOfGroupsReport(Group group, AttendanceReportRequest request)
+    {
 
         var userIds = group.Users.Select(x => x.Id).ToList();
 
@@ -286,10 +301,6 @@ public class AttendanceManager : IAttendanceManager
             records = records.Where(x => request.AttendanceStatusIds.Contains(x.AttendanceStatusId));
         }
 
-        if (request.Days != null)
-        {
-            records = records.Where(x => request.Days.Contains(x.Attendance.RecordedFor.DayOfWeek));
-        }
 
         var timeSlotsQuery = context.TimeSlots.Where(x => x.ScheduleId == group.ScheduleId).AsQueryable();
 
@@ -298,16 +309,21 @@ public class AttendanceManager : IAttendanceManager
             timeSlotsQuery = timeSlotsQuery.Where(x => request.TimeSlotIds.Contains(x.Id));
         }
 
+        var query = records.AsEnumerable();
+
+        if (request.Days != null)
+        {
+            query = records.AsEnumerable().Where(x => request.Days.Contains(x.Attendance.RecordedFor.DayOfWeek));
+        }
         var timeSlots = timeSlotsQuery.ToList();
 
-        var attendanceRecords = records.GroupBy(x => new
+        var attendanceRecords = query.GroupBy(x => new
         {
             x.Attendance.RecordedFor.Date,
             x.Attendance.Slot.TimeSlotId,
             x.AttendanceStatusId
         }).OrderBy(x => x.Key.Date)
         .ThenBy(x => x.Key.AttendanceStatusId)
-
         .Select(x => new
         {
             x.Key.Date,
@@ -317,82 +333,211 @@ public class AttendanceManager : IAttendanceManager
         }).ToList();
 
         // if not start date, or end date, find the earliest and latest dates
-
-        if (request.StartDate == null || request.EndDate == null)
+        // if no records, return empty list
+        if (attendanceRecords.Count == 0)
         {
-            var earliestDate = attendanceRecords.Select(x => x.Date).Min();
-            var latestDate = attendanceRecords.Select(x => x.Date).Max();
-
-            if (request.StartDate == null)
+            return new GroupReportView
             {
-                request.StartDate = earliestDate;
-            }
-
-            if (request.EndDate == null)
-            {
-                request.EndDate = latestDate;
-            }
+                Group = mapper.Map<GroupResponse>(group),
+                DayReports = new List<DayReportView>()
+            };
         }
+
 
         List<DayReportView> dayReports = new();
 
         var AttendanceStatuses = context.AttendanceStatuses.Where(x => x.OrganizationId == group.OrganizationId).ToList();
 
-        // fill in the day reports
-        // for each day in the range
-        // set day and time slots
-        // for each time slot
-        // set attendance status id and count
-
-        if (request.StartDate.HasValue && request.EndDate.HasValue)
+        foreach (var record in attendanceRecords)
         {
-            // generate day reports for each day in the range
-            for (DateTime date = request.StartDate.Value.Date; date <= request.EndDate.Value.Date; date = date.AddDays(1))
+
+            var dayReport = dayReports.FirstOrDefault(x => x.Date == record.Date);
+
+            if (dayReport == null)
             {
-                // create a new day report for the current date
-                DayReportView dayReport = new()
+                dayReport = new DayReportView
                 {
-                    Date = date,
+                    Date = record.Date,
+                    TimeSlotReports = new List<TimeSlotReportView>()
                 };
 
-                // for each time slot in the group
-                foreach (var timeSlot in timeSlots)
-                {
-                    // create a new time slot report for the current time slot
-                    TimeSlotReportView timeSlotReport = new()
-                    {
-                        TimeSlotId = timeSlot.Id,
-                    };
-
-                    // for each attendance status in the organization
-                    foreach (var attendanceStatus in AttendanceStatuses)
-                    {
-                        // count the number of attendances with the current attendance status for the current time slot and date
-                        int count = attendanceRecords.Where(x => x.Date == date && x.TimeSlotId == timeSlot.Id && x.AttendanceStatusId == attendanceStatus.Id).Select(x => x.Count).FirstOrDefault();
-
-                        // add the attendance status count to the time slot report
-                        timeSlotReport.AttendanceStatusCounts.Add(new()
-                        {
-                            AttendanceStatusId = attendanceStatus.Id,
-                            Count = count
-                        });
-                    }
-
-                    // add the time slot report to the day report
-                    dayReport.TimeSlotReports.Add(timeSlotReport);
-                }
-
-                // add the day report to the list of day reports
                 dayReports.Add(dayReport);
             }
+
+            var timeSlotReport = dayReport.TimeSlotReports.FirstOrDefault(x => x.TimeSlotId == record.TimeSlotId);
+
+            if (timeSlotReport == null)
+            {
+                timeSlotReport = new TimeSlotReportView
+                {
+                    TimeSlotId = record.TimeSlotId,
+                    AttendanceStatusCounts = new List<AttendanceStatusCount>()
+                };
+
+                dayReport.TimeSlotReports.Add(timeSlotReport);
+            }
+
+            var attendanceStatusReport = timeSlotReport.AttendanceStatusCounts.FirstOrDefault(x => x.AttendanceStatusId == record.AttendanceStatusId);
+
+            if (attendanceStatusReport == null)
+            {
+                attendanceStatusReport = new AttendanceStatusCount
+                {
+                    AttendanceStatusId = record.AttendanceStatusId,
+                    Count = record.Count
+                };
+
+                timeSlotReport.AttendanceStatusCounts.Add(attendanceStatusReport);
+            }
+            else
+            {
+
+                attendanceStatusReport.Count += record.Count;
+            }
+
+
+
+        }
+
+        if (group.GroupType == GroupType.GroupOfGroups)
+        {
+            group.Users = new List<ApplicationUser>();
         }
 
         return new GroupReportView
         {
-            Group = mapper.Map<GroupSummaryResponse>(group),
+            Group = mapper.Map<GroupResponse>(group),
             AttendanceStatuses = AttendanceStatuses,
             TimeSlots = mapper.Map<List<TimeSlotResponse>>(timeSlots),
             DayReports = dayReports
+        };
+    }
+
+    private GroupReportView GetGroupOfUsersReport(Group group, AttendanceReportRequest request)
+    {
+        var userIds = group.Users.Select(x => x.Id).ToList();
+
+        var records = context.Records.Include(x => x.Attendance).ThenInclude(x => x.Slot).ThenInclude(x => x.TimeSlot)
+            .Include(x => x.Attendance).ThenInclude(x => x.Topic).Where(x => x.Attendance.GroupId == group.Id)
+            .Where(x => x.UserId != null && userIds.Contains(x.UserId)).AsQueryable();
+
+        if (request.StartDate != null)
+        {
+            records = records.Where(x => x.Attendance.RecordedFor.Date >= ((DateTime)request.StartDate).Date);
+        }
+
+        if (request.EndDate != null)
+        {
+            records = records.Where(x => x.Attendance.RecordedFor.Date <= ((DateTime)request.EndDate).Date);
+        }
+
+        if (request.TimeSlotIds != null)
+        {
+            records = records.Where(x => x.Attendance.Slot != null && request.TimeSlotIds.Contains(x.Attendance.Slot.TimeSlotId));
+        }
+
+        if (request.TopicIds != null)
+        {
+            records = records.Where(x => request.TopicIds.Contains(x.Attendance.TopicId));
+        }
+
+        if (request.AttendanceStatusIds != null)
+        {
+            records = records.Where(x => request.AttendanceStatusIds.Contains(x.AttendanceStatusId));
+        }
+
+        var timeSlotsQuery = context.TimeSlots.Where(x => x.ScheduleId == group.ScheduleId).AsQueryable();
+
+        if (request.TimeSlotIds != null)
+        {
+            timeSlotsQuery = timeSlotsQuery.Where(x => request.TimeSlotIds.Contains(x.Id));
+        }
+
+        var recordDebug = records.ToList();
+
+        var attendanceRecords = records
+            .GroupBy(x => new { x.UserId, x.Attendance.RecordedFor.Date, x.Attendance.Slot.TimeSlotId, x.AttendanceStatusId })
+            .OrderBy(x => x.Key.Date)
+            .ThenBy(x => x.Key.AttendanceStatusId)
+            .Select(x => new
+            {
+                x.Key.Date,
+                x.Key.TimeSlotId,
+                x.Key.AttendanceStatusId,
+                x.Key.UserId,
+                Count = x.Count()
+            }).ToList();
+
+        var userReports = group.Users.Select(x => new UserReportView
+        {
+            User = mapper.Map<UserSummaryResponse>(x),
+            DayReports = new List<DayReportView>()
+        }).ToList();
+
+        if (attendanceRecords.Count == 0)
+        {
+            return new UserGroupReportView
+            {
+                Group = mapper.Map<GroupResponse>(group),
+                DayReports = new List<DayReportView>(),
+                UserReports = userReports
+            };
+        }
+
+        var AttendanceStatuses = context.AttendanceStatuses.Where(x => x.OrganizationId == group.OrganizationId).ToList();
+
+        foreach (var record in attendanceRecords)
+        {
+
+
+            var date = record.Date;
+            var timeSlotId = record.TimeSlotId;
+            var attendanceStatusId = record.AttendanceStatusId;
+            var count = record.Count;
+
+            var userRecord = userReports.FirstOrDefault(x => x.User.Id == record.UserId);
+
+            var dayReports = userRecord.DayReports;
+
+            var dayReport = dayReports.FirstOrDefault(x => x.Date == date);
+
+            if (dayReport == null)
+            {
+                dayReport = new DayReportView
+                {
+                    Date = date,
+                };
+
+                dayReports.Add(dayReport);
+            }
+
+            var timeSlotReport = dayReport.TimeSlotReports.FirstOrDefault(x => x.TimeSlotId == timeSlotId);
+
+            if (timeSlotReport == null)
+            {
+                timeSlotReport = new TimeSlotReportView
+                {
+                    TimeSlotId = timeSlotId,
+                };
+
+                dayReport.TimeSlotReports.Add(timeSlotReport);
+            }
+
+            timeSlotReport.AttendanceStatusCounts.Add(new AttendanceStatusCount
+            {
+                AttendanceStatusId = attendanceStatusId,
+                Count = count
+            });
+
+        }
+
+        return new UserGroupReportView
+        {
+            Group = mapper.Map<GroupResponse>(group),
+            AttendanceStatuses = AttendanceStatuses,
+            TimeSlots = mapper.Map<List<TimeSlotResponse>>(timeSlotsQuery.ToList()),
+            DayReports = new List<DayReportView>(),
+            UserReports = userReports
         };
     }
 }

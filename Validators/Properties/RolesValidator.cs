@@ -24,7 +24,7 @@ public class RolesValidator<T> : PropertyValidator<T, string[]>
 
     public override bool IsValid(ValidationContext<T> context, string[] value)
     {
-        if (value == null)
+        if (value == null || value.Length == 0)
         {
             return true;
         }

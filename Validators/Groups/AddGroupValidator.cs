@@ -18,14 +18,12 @@ public class AddGroupValidaor : AbstractValidator<AddGroupRequest>
             new ScheduleIdValidator<AddGroupRequest>(scheduleManager, authManager)
         );
 
-        RuleFor(x => x.Users).Must(users => users == null || users.Length == 0)
-        .When(x => x.ScheduleId == null).SetValidator(
+        RuleFor(x => x.Users).SetValidator(
             new UsersValidator<AddGroupRequest>(authManager, userManager)
         ).When(x => x.GroupType == GroupType.GroupOfUsers);
 
         // when group type is GroupOfGroups, groups must be provided else groups should be null
-        RuleFor(x => x.Groups).Must(groups => groups == null || groups.Length == 0)
-        .When(x => x.ScheduleId == null).SetValidator(
+        RuleFor(x => x.Groups).SetValidator(
             new GroupsValidator<AddGroupRequest>(authManager, groupManager)
         ).When(x => x.GroupType == GroupType.GroupOfGroups);
     }

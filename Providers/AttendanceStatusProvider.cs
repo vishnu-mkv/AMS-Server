@@ -66,6 +66,6 @@ public class AttendanceStatusProvider : IAttendanceStatusProvider
 
     public List<AttendanceStatus> GetAllStatus()
     {
-        return _attendanceStatuses.Values.ToList();
+        return _attendanceStatuses.Values.Where(x => x.OrganizationId == "default").ToList();
     }
 }

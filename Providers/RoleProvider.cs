@@ -49,6 +49,8 @@ public class RoleProvider : IRoleProvider
 
     public List<Role> GetRolesByIds(string[] roleIds)
     {
+        roleIds = roleIds.Where(r => r != null).ToArray();
+
         var roles = roleIds.Select(roleId => _roles.GetValueOrDefault(roleId)).Where(r => r != null).ToList();
         return roles;
     }
